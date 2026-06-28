@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/blackwell_logo.png" alt="Blackwell Intelligence" width="520">
+  <img src="docs/assets/blackwell_logo.png" alt="Blackwell Intelligence" width="380">
 </p>
 
 <h1 align="center">OBSIDIAN PROTOCOL</h1>
@@ -26,6 +26,10 @@
 > intelligence sources used (NVD, CISA KEV, CISA/FBI advisories, MITRE
 > ATT&CK, OASIS STIX/TAXII) are entirely public standards.
 
+<p align="center">
+  <img src="docs/assets/hero_banner.png" alt="OBSIDIAN PROTOCOL — evidence-driven security reasoning" width="100%">
+</p>
+
 ---
 
 ## Dashboard Preview
@@ -36,7 +40,7 @@ dependency, just one file. The **Overview** tab below renders live
 from the actual pipeline run shown throughout this README:
 
 <p align="center">
-  <img src="docs/assets/dashboard_overview.png" alt="OBSIDIAN PROTOCOL — interactive HTML dashboard, Overview tab" width="850">
+  <img src="docs/assets/dashboard_mockup.png" alt="OBSIDIAN PROTOCOL — interactive HTML dashboard, Overview tab" width="850">
 </p>
 
 The dashboard has seven tabs (Overview, Findings, Detection, Risk &
@@ -50,8 +54,7 @@ The same pipeline also produces a print-ready, multi-page PDF
 operation report (`reports/obsidian_protocol_report.pdf`):
 
 <p align="center">
-  <img src="docs/assets/pdf_report_cover.png" alt="OBSIDIAN PROTOCOL — PDF report cover page" width="410">
-  <img src="docs/assets/pdf_report_risk.png" alt="OBSIDIAN PROTOCOL — PDF report, Risk Scoring section" width="410">
+  <img src="docs/assets/pdf_mockup.png" alt="OBSIDIAN PROTOCOL — PDF report, cover page and Risk Scoring section" width="850">
 </p>
 
 ---
@@ -69,20 +72,20 @@ described below, sitting on top of 17 modules that each correspond to
 a named, documented industry problem:
 
 | Real-world problem | OBSIDIAN module | Question it answers |
-|---|---|---|
-| Alert fatigue (20K–200K+ alerts/day, 90%+ FP) | **CORRELATION ENGINE / BCA** | Are these 6 alerts actually one operation? |
-| "We don't know what we can actually catch" | **COVERAGE HEATMAP** | Which MITRE tactics do we have real visibility into? |
-| Writing a Sigma rule is easy; writing a *good* one is hard | **RULE QUALITY** | What's this rule's FP risk, performance cost, coverage? |
-| IOCs lose value fast | **IOC DECAY** | Can we still trust this IOC? |
-| "Which log source are we missing?" | **TELEMETRY GAP** | Which MITRE tactic is a blind spot for us? |
-| Red team quality is hard to measure | **EMULATION SCORE** | Is this emulation realistic, or just easy? |
-| "How did the attack progress?" (a table only) | **RISK GRAPH** | What's the real path from Internet to Database? |
-| An IOC was found but nobody knows why it happened | **ROOT CAUSE** | What was the root cause, and how do we prevent it? |
-| Post-incident, "what happened when" is unclear | **ATTACK REPLAY** | How did the attack unfold, minute by minute? |
-| The CEO doesn't read Sigma rules | **EXECUTIVE REPORT / DECISION ENGINE** | Risk level, impact, action — on one page |
-| Conclusions aren't traceable to their evidence | **BLACKWELL EVIDENCE GRAPH** | Why does the system believe this? |
-| Confidence is a single brittle bucket | **BLACKWELL CONFIDENCE ENGINE** | How much corroboration actually backs this? |
-| Severity and urgency get conflated | **BLACKWELL EVIDENCE RANKING** | What should an analyst look at first? |
+| :--- | :--- | :--- |
+| Alert fatigue (20K-200K+ alerts/day, 90%+ FP) | **CORRELATION ENGINE / BCA** | Are these 6 alerts one operation? |
+| No visibility into real detection coverage | **COVERAGE HEATMAP** | Which MITRE tactics can we actually see? |
+| Sigma rules are easy to write, hard to write well | **RULE QUALITY** | What's this rule's FP risk and cost? |
+| IOCs lose value over time | **IOC DECAY** | Can we still trust this IOC? |
+| Unclear which log sources are missing | **TELEMETRY GAP** | Which MITRE tactic is a blind spot? |
+| Red team quality is hard to measure | **EMULATION SCORE** | Is this emulation realistic? |
+| Attack progression shown only as a table | **RISK GRAPH** | What's the real path to the database? |
+| IOC found, root cause unknown | **ROOT CAUSE** | Why did this happen, and how to prevent it? |
+| Post-incident timeline is unclear | **ATTACK REPLAY** | How did the attack unfold, minute by minute? |
+| Executives don't read Sigma rules | **EXECUTIVE REPORT / DECISION ENGINE** | Risk, impact, action - on one page |
+| Conclusions aren't traceable to evidence | **BLACKWELL EVIDENCE GRAPH** | Why does the system believe this? |
+| Confidence is a single brittle bucket | **BLACKWELL CONFIDENCE ENGINE** | How much corroboration backs this? |
+| Severity and urgency get conflated | **BLACKWELL EVIDENCE RANKING** | What should an analyst check first? |
 
 ---
 
@@ -96,16 +99,16 @@ modules' outputs into a single, queryable, auditable evidence
 structure, and to produce decisions instead of dashboards.
 
 | # | Component | What it does |
-|---|---|---|
-| 1 | **Blackwell Evidence Graph (BEG)** | The substrate. A typed graph of claims (not entities) and the evidence relationships between them — `SUPPORTS`, `CONTRADICTS`, `CAUSES`, etc. |
-| 2 | **Blackwell Correlation Algorithm (BCA) v1.0** | Formally specified, graph-native successor to `correlation-engine/correlate.py` |
-| 3 | **Blackwell Risk Score (BRS) v1.0** | Formalized, graph-integrated version of `risk-engine`'s composite risk formula |
-| 4 | **Blackwell Confidence Engine (BCE)** | Continuous, multi-signal confidence — corroboration, source diversity, pattern strength, contradiction penalty |
-| 5 | **Blackwell Knowledge Graph (BKG)** | Entity-relationship view, derived as a pure projection of BEG — never a second source of truth |
-| 6 | **Blackwell Temporal Reasoning (BTR)** | Tempo classification and anomalous-gap detection within an incident's timeline |
-| 7 | **Blackwell Evidence Ranking (BER)** | "What should an analyst look at first" — a different question from confidence, with the confidence term deliberately inverted |
-| 8 | **Blackwell Attack Path Prediction (BAPP)** | Structural next-step hypotheses from documented ATT&CK tactic transitions — explicitly **not** adversary forecasting |
-| 9 | **Blackwell Decision Engine (BDE)** | Joins every module above into one prioritized action list, with a technical briefing and an executive briefing generated from the same underlying decision object |
+| :--- | :--- | :--- |
+| 1 | **Blackwell Evidence Graph (BEG)** | The substrate: a typed graph of claims and their evidence relationships (`SUPPORTS`, `CONTRADICTS`, `CAUSES`) |
+| 2 | **Blackwell Correlation Algorithm (BCA) v1.0** | Graph-native successor to `correlation-engine/correlate.py` |
+| 3 | **Blackwell Risk Score (BRS) v1.0** | Graph-integrated version of the composite risk formula |
+| 4 | **Blackwell Confidence Engine (BCE)** | Multi-signal confidence: corroboration, source diversity, pattern strength |
+| 5 | **Blackwell Knowledge Graph (BKG)** | Entity-relationship view, a pure projection of BEG |
+| 6 | **Blackwell Temporal Reasoning (BTR)** | Tempo classification and anomalous-gap detection |
+| 7 | **Blackwell Evidence Ranking (BER)** | What an analyst should check first - confidence term inverted |
+| 8 | **Blackwell Attack Path Prediction (BAPP)** | Structural next-step hypotheses from ATT&CK tactic transitions |
+| 9 | **Blackwell Decision Engine (BDE)** | Joins every module into one action list, technical + executive briefing |
 
 See [`blackwell-core/README.md`](blackwell-core/README.md) for the
 full architecture, the run order, and
@@ -128,24 +131,24 @@ intelligence sharing, and executive reporting — automated across a
 17-module platform.
 
 | # | Module | Function |
-|---|---|---|
-| 1 | **VECTOR-I / VECTOR-II** | Attack chain — exploitation infrastructure and execution |
-| 2 | **TELEMETRY** | Hybrid data collection (auditd + eBPF + Apache log) and timeline construction |
-| 3 | **CORRELATION ENGINE** | Groups raw events into incidents, reducing alert volume |
-| 4 | **PURPLE TEAM** | Attack -> detection -> validation automation, Detection Coverage |
+| :--- | :--- | :--- |
+| 1 | **VECTOR-I / VECTOR-II** | Attack chain - exploitation infrastructure and execution |
+| 2 | **TELEMETRY** | Hybrid collection (auditd + eBPF + Apache log), timeline construction |
+| 3 | **CORRELATION ENGINE** | Groups raw events into incidents, reduces alert volume |
+| 4 | **PURPLE TEAM** | Attack-to-detection matching, Detection Coverage automation |
 | 5 | **RISK ENGINE** | Composite risk scoring (CVSS + KEV + campaign + defense gap) |
 | 6 | **COVERAGE HEATMAP** | Visual MITRE-tactic-based coverage map |
 | 7 | **TELEMETRY GAP** | Prioritizes missing log sources by MITRE impact |
 | 8 | **RULE QUALITY** | FP/performance/coverage analysis of Sigma rules |
-| 9 | **IOC DECAY** | Confidence scoring for IOCs by age/frequency/source count |
-| 10 | **ROOT CAUSE** | Causal chain from CVE to root cause (patch policy, config, WAF) |
+| 9 | **IOC DECAY** | Confidence scoring for IOCs by age, frequency, source count |
+| 10 | **ROOT CAUSE** | Causal chain from CVE to root cause (patch, config, WAF) |
 | 11 | **EMULATION SCORE** | Diversity/realism/noise score for the red team operation |
-| 12 | **RISK GRAPH** | Internet->Database attack path visualization (Mermaid) |
-| 13 | **ATTACK REPLAY** | Minute-by-minute, evidence-timestamped replay of the attack |
-| 14 | **SIGINT** | Threat Intelligence — campaign analysis using NVD/KEV/CISA data |
-| 15 | **WARDEN** | Detection Engineering — Sigma/YARA rules, MITRE mapping |
+| 12 | **RISK GRAPH** | Internet-to-database attack path visualization (Mermaid) |
+| 13 | **ATTACK REPLAY** | Minute-by-minute, evidence-timestamped replay |
+| 14 | **SIGINT** | Threat intelligence - campaign analysis from NVD/KEV/CISA |
+| 15 | **WARDEN** | Detection engineering - Sigma/YARA rules, MITRE mapping |
 | 16 | **INTEL EXPORT** | STIX 2.1 + TAXII 2.1 compliant IOC export |
-| 17 | **REPORTING** | ATT&CK Navigator, HTML/PDF report, Executive Summary |
+| 17 | **REPORTING** | ATT&CK Navigator, HTML/PDF report, executive summary |
 
 ---
 
@@ -380,6 +383,19 @@ All four report formats are generated from the exact same
 HTML dashboard, and the executive summary can never silently disagree
 with each other.
 
+## Contributing
+
+Contributions are welcome - see [`CONTRIBUTING.md`](CONTRIBUTING.md)
+for ground rules, the development setup, and how this project's
+"no fabricated metrics" standard applies to pull requests. Open
+[issues](../../issues) track the current roadmap.
+
+## Security
+
+Found an issue in this repository's own code (not the CVEs it
+reproduces, which are already public and patched)? See
+[`SECURITY.md`](SECURITY.md) for how to report it.
+
 ## Disclaimer
 
 OBSIDIAN PROTOCOL is a platform that reproduces known, patched CVEs
@@ -392,7 +408,7 @@ written authorization to test.
 ---
 
 <p align="center">
-  <img src="docs/assets/blackwell_logo.png" alt="Blackwell Intelligence" width="280">
+  <img src="docs/assets/blackwell_logo.png" alt="Blackwell Intelligence" width="220">
 </p>
 
 <p align="center">
