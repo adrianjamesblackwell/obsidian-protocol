@@ -1,0 +1,30 @@
+<svg width="680" height="240" viewBox="0 0 680 240" xmlns="http://www.w3.org/2000/svg">
+<title>Blackwell Intelligence logo</title>
+<rect width="680" height="240" fill="#ffffff"/>
+<defs>
+<linearGradient id="bladeCenter" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#262625"/>
+<stop offset="100%" stop-color="#000000"/>
+</linearGradient>
+<linearGradient id="bladeLeft" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#33332f"/>
+<stop offset="100%" stop-color="#000000"/>
+</linearGradient>
+<linearGradient id="bladeRight" x1="1" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#33332f"/>
+<stop offset="100%" stop-color="#000000"/>
+</linearGradient>
+</defs>
+
+<polygon points="105,14 120,28 120,208 105,222 90,208 90,28" fill="url(#bladeCenter)"/>
+
+<polygon points="60,64 75,78 75,168 60,210 32,172 32,134 47,148 47,90" fill="url(#bladeLeft)"/>
+
+<polygon points="150,64 135,78 135,168 150,210 178,172 178,134 163,148 163,90" fill="url(#bladeRight)"/>
+
+<text x="245" y="80" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" fill="#0a0a0a" letter-spacing="1.5">BLACKWELL</text>
+<text x="245" y="118" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="500" fill="#4a4a48" letter-spacing="8">INTELLIGENCE</text>
+<line x1="245" y1="136" x2="640" y2="136" stroke="#cfcdc4" stroke-width="0.75"/>
+<text x="245" y="158" font-family="Arial, Helvetica, sans-serif" font-size="13.5" fill="#5f5e5a" letter-spacing="0.5">Evidence-driven security reasoning systems</text>
+<text x="245" y="178" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#888780" letter-spacing="0.4">Adrian James Blackwell</text>
+</svg>
