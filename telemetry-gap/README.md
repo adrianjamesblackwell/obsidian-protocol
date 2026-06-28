@@ -1,48 +1,51 @@
 # TELEMETRY GAP ANALYZER
-### OBSIDIAN PROTOCOL / "Hangi Logumuz Eksik?" Sorusunun Cevabı
+### OBSIDIAN PROTOCOL / Answering "Which Logs Are We Missing?"
 
 ## Problem
 
-Kurumlar neyi izlediklerini bilir, neyi **izlemediklerini** bilmez.
-Apache logu var, DNS yok; EDR var, Sysmon yok. Her eksik kaynak,
-o kaynağın kapsadığı MITRE taktiklerinde bir kör nokta yaratır.
+Organizations know what they monitor, not what they **don't**
+monitor. Apache logs exist, DNS logs don't; EDR exists, Sysmon
+doesn't. Every missing source creates a blind spot in the MITRE
+tactics that source would otherwise cover.
 
-## Çözüm
+## Solution
 
-`gap_analysis.py`, sekiz yaygın telemetri kaynağının hangi MITRE
-taktiklerine görünürlük sağladığını bilen bir referans tablo
-kullanır, projenin hangilerini gerçekten topladığını kontrol eder,
-ve sonucu üç kategoriye ayırır:
+`gap_analysis.py` uses a reference table that knows which MITRE
+tactics eight common telemetry sources provide visibility into,
+checks which of those the project actually collects, and classifies
+the result into three categories:
 
-- **Tam görünür** — bu taktiği kapsayan tüm kaynaklar toplanıyor
-- **Kısmi görünür** — bazı kaynaklar var, bazıları eksik
-- **Kör** — bu taktiği kapsayan hiçbir kaynak toplanmıyor
+- **Fully visible** — every source covering this tactic is being collected
+- **Partially visible** — some sources exist, others are missing
+- **Blind** — no source covering this tactic is being collected
 
-## Gerçek Bulgu (Bu Projenin Kendi Durumu)
+## Real Finding (This Project's Own State)
 
-OBSIDIAN PROTOCOL şu an **6 MITRE taktiğinde tamamen kör**: Collection,
-Command and Control, Credential Access, Discovery, Exfiltration,
-Lateral Movement. Bu beklenen bir sonuç — proje VECTOR-I/II'nin
-kapsadığı Initial Access/Execution/Privilege Escalation'a odaklandı,
-ağ/EDR seviyesi telemetri bilinçli olarak kapsam dışı bırakıldı
-(bkz. `docs/research-findings.md` Limitations #8).
+OBSIDIAN PROTOCOL is currently **completely blind in 6 MITRE
+tactics**: Collection, Command and Control, Credential Access,
+Discovery, Exfiltration, Lateral Movement. This is an expected
+outcome — the project focused on the Initial Access/Execution/
+Privilege Escalation tactics covered by VECTOR-I/II, and deliberately
+left network/EDR-level telemetry out of scope (see
+`docs/research-findings.md`, Limitations #8).
 
-## Önceliklendirme Mantığı
+## Prioritization Logic
 
-Eksik kaynaklar, **kapattıkları kör taktik sayısına** göre sıralanır
-— "en fazla kör noktayı tek yatırımla kapatan kaynak" önce önerilir.
-Bu projenin kendi çıktısında bu, NetFlow'u (4 kör taktik) EDR'dan
-(3) ve DNS'ten (2) önce önerdi.
+Missing sources are ranked by **how many blind tactics they would
+close** — the source that "closes the most blind spots with a single
+investment" is recommended first. In this project's own output, that
+recommended NetFlow (closing 4 blind tactics) ahead of EDR (3) and DNS
+(2).
 
-## Kullanım
+## Usage
 
 ```bash
 python3 telemetry-gap/gap_analysis.py
 ```
 
-## Bilinen Sınırlama
+## Known Limitation
 
-`TELEMETRY_SOURCE_COVERAGE` tablosu manuel ve sekiz kaynakla sınırlı.
-Gerçek bir üretim sisteminde bu, MITRE'nin resmi "Data Sources"
-veri setinden (her teknik için "hangi veri bileşeni gerekli" bilgisi)
-otomatik türetilir.
+The `TELEMETRY_SOURCE_COVERAGE` table is manually curated and limited
+to eight sources. In a real production system, this would be
+automatically derived from MITRE's official "Data Sources" dataset
+(which specifies, per technique, which data component is required).

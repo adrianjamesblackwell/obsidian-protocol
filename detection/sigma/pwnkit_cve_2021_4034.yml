@@ -2,50 +2,51 @@ title: PwnKit (CVE-2021-4034) Local Privilege Escalation via pkexec
 id: 0506a799-698b-43b4-85a1-ac4c84c720e9-adapted
 status: stable
 description: |
-    pkexec'in argc=0 (argümansız) çağrılmasını ve GCONV_PATH ortam
-    değişkeninin manipülasyonunu tespit eder.
+    Detects pkexec being invoked with argc=0 (no arguments) combined
+    with manipulation of the GCONV_PATH environment variable.
 
-    KRİTİK UYARI: Bu exploit, pkexec'in kimlik doğrulama ve audit
-    logging kodu çalışmadan ÖNCE zafiyete erişir. Bu nedenle standart
-    /var/log/auth.log ve syslog kayıtları exploit denemesini
-    YAKALAMAZ. Tespit için auditd'nin execve()/open() syscall
-    seviyesinde izleme yapması zorunludur — sadece auth.log'a
-    bakmak yanlış güvenlik hissi verir.
+    CRITICAL WARNING: This exploit reaches the vulnerable code path
+    BEFORE pkexec's authentication and audit logging routines ever
+    run. As a result, standard /var/log/auth.log and syslog entries
+    will NOT capture the exploitation attempt. Reliable detection
+    requires auditd monitoring at the execve()/open() syscall level —
+    relying on auth.log alone creates a false sense of security.
 
-    Bu kural iki kaynağı birleştirir: SigmaHQ'nun auth-log tabanlı
-    kuralı (zayıf sinyal, çoğu durumda hiçbir şey yakalamaz) ve
-    auditd syscall tabanlı tespiti (gerçek sinyal).
+    This rule combines two sources: SigmaHQ's auth-log-based rule
+    (a weak signal that catches nothing in most real-world cases)
+    and auditd syscall-level detection (the actual reliable signal).
 references:
     - https://github.com/SigmaHQ/sigma/blob/master/rules/linux/auditd/lnx_auditd_cve_2021_4034.yml
     - https://blog.qualys.com/vulnerabilities-threat-research/2022/01/25/pwnkit-local-privilege-escalation-vulnerability-discovered-in-polkits-pkexec-cve-2021-4034
     - https://www.sysdig.com/blog/detecting-mitigating-cve-2021-4034-sysdig
-author: obsidian-protocol-warden (auth-log kısmı orijinal olarak Sreeman, SigmaHQ)
+author: obsidian-protocol-warden (auth-log portion originally by Sreeman, SigmaHQ)
 date: 2026/06/27
 logsource:
     product: linux
     service: auditd
 detection:
-    # Birincil sinyal (güvenilir): auditd syscall seviyesi
-    # pkexec, hiç argüman olmadan (argc=0) çalıştırılıyor VE
-    # ortam değişkenlerinde GCONV_PATH var
+    # Primary signal (reliable): auditd syscall level.
+    # pkexec is executed with zero arguments (argc=0) AND
+    # GCONV_PATH is present among the process environment variables.
     selection_auditd_primary:
         type: 'EXECVE'
         a0: '/usr/bin/pkexec'
-        # argv dizisi boş / sadece binary adını içeriyor
+        # argv array is empty / contains only the binary name
     selection_auditd_env:
         proc.env|contains: 'GCONV_PATH='
 
-    # İkincil sinyal (zayıf, sadece referans için): auth.log
-    # Bu genelde HİÇBİR ŞEY YAKALAMAZ çünkü exploit auth kodunun
-    # önüne geçiyor — ama nadir varyantlarda XAUTHORITY hata mesajı
-    # sızdırılabiliyor
+    # Secondary signal (weak, reference only): auth.log.
+    # This usually catches NOTHING because the exploit runs before
+    # the auth code path — but in rare variants an XAUTHORITY error
+    # message can leak through.
     selection_authlog_weak:
         message|contains:
             - 'pkexec'
             - 'The value for environment variable XAUTHORITY contains suspicious content'
 
-    # Dosya sistemi göstergesi: GCONV_PATH adlı dizin/dosya oluşturma
-    # (exploit'in gconv-modules sahte dosyasını yazdığı yer)
+    # Filesystem indicator: creation of a directory/file named
+    # GCONV_PATH (where the exploit writes its forged gconv-modules
+    # file).
     selection_filesystem:
         file.path|contains:
             - 'GCONV_PATH='
@@ -56,11 +57,10 @@ detection:
 
     condition: (selection_auditd_primary and selection_auditd_env) or selection_filesystem
 falsepositives:
-    - Yok (argc=0 ile pkexec çalıştırmanın meşru bir kullanım senaryosu yoktur)
+    - None (there is no legitimate use case for invoking pkexec with argc=0)
 level: critical
 tags:
     - attack.privilege_escalation
     - attack.t1548.001
     - attack.t1068
     - cve.2021-4034
-

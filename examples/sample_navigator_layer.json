@@ -6,7 +6,7 @@
     "layer": "4.5"
   },
   "domain": "enterprise-attack",
-  "description": "VECTOR-I (CVE-2021-41773/42013) ve VECTOR-II (CVE-2021-4034) saldırı zincirinin Purple Team doğrulama sonuçlarına dayalı MITRE ATT&CK teknik kapsama haritası. Yeşil = WARDEN modülü tarafından yakalandı, Kırmızı = detection gap (yakalanmadı).",
+  "description": "MITRE ATT&CK technique coverage map for the VECTOR-I (CVE-2021-41773/42013) and VECTOR-II (CVE-2021-4034) attack chain, based on Purple Team validation results. Green = caught by the WARDEN module, Red = detection gap (not caught).",
   "filters": {
     "platforms": [
       "Linux"
@@ -26,28 +26,28 @@
       "techniqueID": "T1595",
       "score": 0,
       "color": "#e74c3c",
-      "comment": "OBSIDIAN PROTOCOL operasyonunda kullanıldı: VECTOR-I: Apache sürüm doğrulama (recon). Durum: DETECTION GAP - yakalanmadı",
+      "comment": "Used in the OBSIDIAN PROTOCOL operation: VECTOR-I: Apache version verification (recon). Status: DETECTION GAP - not caught",
       "showSubtechniques": true
     },
     {
       "techniqueID": "T1190",
       "score": 100,
       "color": "#2ecc71",
-      "comment": "OBSIDIAN PROTOCOL operasyonunda kullanıldı: VECTOR-I: Path traversal ile secrets.env okuma. Durum: WARDEN tarafından yakalandı",
+      "comment": "Used in the OBSIDIAN PROTOCOL operation: VECTOR-I: Reading secrets.env via path traversal. Status: caught by WARDEN",
       "showSubtechniques": true
     },
     {
       "techniqueID": "T1059",
       "score": 100,
       "color": "#2ecc71",
-      "comment": "OBSIDIAN PROTOCOL operasyonunda kullanıldı: VECTOR-I: CGI yönlendirme ile RCE (komut çalıştırma). Durum: WARDEN tarafından yakalandı",
+      "comment": "Used in the OBSIDIAN PROTOCOL operation: VECTOR-I: RCE via CGI redirection (command execution). Status: caught by WARDEN",
       "showSubtechniques": true
     },
     {
       "techniqueID": "T1548.001",
       "score": 100,
       "color": "#2ecc71",
-      "comment": "OBSIDIAN PROTOCOL operasyonunda kullanıldı: VECTOR-II: PwnKit exploit'i ile root'a çıkış. Durum: WARDEN tarafından yakalandı",
+      "comment": "Used in the OBSIDIAN PROTOCOL operation: VECTOR-II: Escalation to root via the PwnKit exploit. Status: caught by WARDEN",
       "showSubtechniques": true
     }
   ],
@@ -61,22 +61,22 @@
   },
   "legendItems": [
     {
-      "label": "Yakalandı (WARDEN sinyali var)",
+      "label": "Detected (WARDEN signal present)",
       "color": "#2ecc71"
     },
     {
-      "label": "Detection Gap (sinyal yok)",
+      "label": "Detection Gap (no signal)",
       "color": "#e74c3c"
     }
   ],
   "metadata": [
     {
-      "name": "Proje",
+      "name": "Project",
       "value": "OBSIDIAN PROTOCOL"
     },
     {
-      "name": "Üretim tarihi",
-      "value": "otomatik - generate_navigator_layer.py"
+      "name": "Generated",
+      "value": "automatic - generate_navigator_layer.py"
     }
   ],
   "showTacticRowBackground": true,

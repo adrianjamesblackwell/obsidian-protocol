@@ -3,48 +3,51 @@
 
 ## Problem
 
-Risk raporları genelde düz tablo formatındadır ("CVE-X: Yüksek").
-Yönetim ve mimarlar için en kritik soru çoğu zaman bir tablo sorusu
-değil, bir **yol** sorusudur: "saldırgan internetten veritabanına
-nasıl ulaşır?"
+Risk reports are usually flat tables ("CVE-X: High"). For management
+and architects, the most critical question is often not a table
+question at all — it's a **path** question: "how does an attacker
+actually get from the internet to the database?"
 
-## Çözüm
+## Solution
 
-`risk_graph.py`, gerçek saldırı zincirini (VECTOR-I → VECTOR-II,
-Risk Engine'den gerçek skorlarla) + olası bir genişleme senaryosunu
-(credential dump → lateral movement → database) tek bir yönlü graph
-(DAG) olarak üretir.
+`risk_graph.py` produces the real attack chain (VECTOR-I → VECTOR-II,
+with real scores from the Risk Engine) plus a plausible extension
+scenario (credential dump → lateral movement → database) as a single
+directed acyclic graph (DAG).
 
-## Gerçek vs Varsayımsal Ayrımı (Kritik)
+## Real vs. Hypothetical Distinction (Critical)
 
-Graph'taki düğümler iki tipe ayrılır:
+Nodes in the graph fall into two types:
 
-- **Gerçek (confirmed=True):** `internet → target49 → shell → root`
-  zinciri — bu lab'da **gerçekten exploit edilmiş**, kanıtı
-  `docs/walkthrough.md`'de var.
-- **Varsayımsal (confirmed=False):** `root → creddump → lateral →
-  database` — bu segment **hiçbir zaman exploit edilmemiştir**, sadece
-  "eğer zincir buradan devam etseydi nasıl görünürdü" projeksiyonu.
+- **Real (confirmed=True):** the `internet → target49 → shell → root`
+  chain — this was **actually exploited** in the lab, with evidence in
+  `docs/walkthrough.md`.
+- **Hypothetical (confirmed=False):** `root → creddump → lateral →
+  database` — this segment was **never exploited**; it is only a
+  projection of "what the chain would look like if it continued from
+  here."
 
-Mermaid çıktısında bu ayrım görsel olarak da kodlanmış: gerçek
-adımlar düz çizgi + koyu renk, varsayımsal adımlar kesikli çizgi +
-gri/soluk renk. Bu ayrımı gizlemek, bir raporun en tehlikeli
-hatalarından biridir — "olası" ile "kanıtlanmış"ı karıştırmak.
+This distinction is also encoded visually in the Mermaid output: real
+steps use a solid line and a darker color, hypothetical steps use a
+dashed line and a grey/muted color. Hiding this distinction is one of
+the most dangerous mistakes a report can make — conflating "possible"
+with "proven."
 
-## Kullanım
+## Usage
 
 ```bash
 python3 risk-graph/risk_graph.py
 ```
 
-Çıktı: `docs/risk-graph.mermaid` (GitHub'da otomatik render olur),
-`risk-graph/output/risk_graph.json` (ham node/edge listesi — Neo4j,
-Gephi gibi araçlara aktarılabilir).
+Output: `docs/risk-graph.mermaid` (renders automatically on GitHub),
+`risk-graph/output/risk_graph.json` (raw node/edge list — importable
+into tools like Neo4j or Gephi).
 
-## Bilinen Sınırlama
+## Known Limitation
 
-Graph şu an statik/elle tanımlı (`build_graph()` fonksiyonu sabit bir
-zincir kuruyor). Gerçek bir üretim sisteminde bu, Correlation Engine'in
-ürettiği `correlated_incidents.json`'dan **dinamik olarak** inşa edilir
-— her incident bir edge, her aktör/varlık bir node olur. Bu projede
-bilinçli olarak basit/statik tutuldu çünkü amaç metodolojiyi göstermek.
+The graph is currently static/hand-defined (the `build_graph()`
+function constructs a fixed chain). In a real production system, this
+would be built **dynamically** from the Correlation Engine's
+`correlated_incidents.json` output — each incident becoming an edge,
+each actor/entity becoming a node. This project keeps it deliberately
+simple/static because the goal here is to demonstrate the methodology.

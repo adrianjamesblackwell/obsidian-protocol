@@ -2,32 +2,33 @@
 # ============================================================
 # setup-pwnkit.sh — OBSIDIAN PROTOCOL / VECTOR-II
 #
-# Bu script container içine PwnKit (CVE-2021-4034) zafiyetini
-# taşıyan polkit/pkexec paketini kurar.
+# This script installs the polkit/pkexec package carrying the
+# PwnKit (CVE-2021-4034) vulnerability inside the container.
 #
-# CVE-2021-4034 nedir (kısa teknik özet):
-#   pkexec, argv[0]'ı (process'in çağrıldığı isim) hiçbir
-#   doğrulama yapmadan kullanıyordu. argc=0 ile çağrıldığında
-#   (yani process'e hiç argüman verilmediğinde) pkexec, kendi
-#   argv dizisinin dışına taşarak environment'tan veri okumaya
-#   başlıyordu. Bu da GCONV_PATH gibi ortam değişkenleriyle
-#   keyfi shared library injection'a (root yetkisiyle) yol açtı.
+# What CVE-2021-4034 is (short technical summary):
+#   pkexec used argv[0] (the name the process was invoked under)
+#   without any validation. When invoked with argc=0 (i.e. with no
+#   arguments at all), pkexec would read past the end of its own
+#   argv array and start consuming data from the environment
+#   instead. This allowed arbitrary shared library injection (with
+#   root privileges) via environment variables such as GCONV_PATH.
 #
-# Etkilenen sürümler: polkit 0.105 - 0.120 arası (Debian
-# bullseye'daki varsayılan sürüm dahil).
+# Affected versions: polkit 0.105 - 0.120 (including the default
+# version shipped in Debian bullseye).
 #
-# Bu script bilerek PATCH EDİLMEMİŞ bir polkit sürümü bırakır.
+# This script deliberately leaves an UNPATCHED polkit version
+# installed.
 # ============================================================
 set -e
 
-echo "[*] PwnKit (CVE-2021-4034) lab ortamı hazırlanıyor..."
+echo "[*] Preparing the PwnKit (CVE-2021-4034) lab environment..."
 
 apt-get update
-apt-get install -y policykit-1=0.105-31  # bullseye'ın varsayılan, zafiyetli sürümü
+apt-get install -y policykit-1=0.105-31  # bullseye's default, vulnerable version
 
-# pkexec binary'sinin SUID bit'i taşıdığını doğrula
-# (CVE-2021-4034'ün ön koşulu budur)
+# Verify the pkexec binary carries the SUID bit
+# (this is the prerequisite for CVE-2021-4034)
 ls -la /usr/bin/pkexec
 
-echo "[*] Kurulum tamamlandı. pkexec SUID bit ile kurulu."
-echo "[*] Zafiyetli sürüm: $(dpkg -l | grep policykit-1)"
+echo "[*] Setup complete. pkexec is installed with the SUID bit set."
+echo "[*] Vulnerable version: $(dpkg -l | grep policykit-1)"

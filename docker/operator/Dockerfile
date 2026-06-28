@@ -1,12 +1,12 @@
 # ============================================================
 # OBSIDIAN PROTOCOL — OPERATOR
-# Saldırı zincirinin (VECTOR-I / VECTOR-II) yürütüldüğü kutu
+# The box the attack chain (VECTOR-I / VECTOR-II) is executed from
 #
-# Bu container, range'deki "target-49" hedefine karşı
-# exploitation yapmak için kullanılır. Sadece range'in kendi
-# Docker network'üne erişimi vardır — internete veya host
-# sisteme erişimi yoktur (docker-compose.yml'deki network_mode
-# ve internal: true ayarına bakın).
+# This container is used to run exploitation against the range's
+# "target-49" target. It only has access to the range's own Docker
+# network — it has no access to the internet or the host system
+# (see the network_mode and internal: true settings in
+# docker-compose.yml).
 # ============================================================
 
 FROM kalilinux/kali-rolling

@@ -1,54 +1,57 @@
-# OBSIDIAN PROTOCOL — Operatör Değerlendirmesi
-### Gerçek Tehdit Verisi ile Operasyon Deneyiminin Karşılaştırılması
+# OBSIDIAN PROTOCOL — Operator Assessment
+### Comparing Real Threat Data Against Operation Experience
 
-> Bu dosyayı doldurmadan önce [`docs/threat-intelligence.md`](threat-intelligence.md)'yi
-> oku — orada AndroxGh0st botnet kampanyası, hedeflenen sektörler ve
-> PwnKit'in 13 yıllık zaman çizelgesi gibi gerçek veriler var.
+> Before filling out this file, read
+> [`docs/threat-intelligence.md`](threat-intelligence.md) — it
+> contains real data such as the AndroxGh0st botnet campaign, the
+> sectors it targeted, and PwnKit's 13-year timeline.
 
-## 1. Gerçek Veri Bulguları (threat-intel/cve_intel_output.json'dan)
+## 1. Real Data Findings (from threat-intel/cve_intel_output.json)
 
-| CVE | CVSS Skoru | KEV'de mi? | KEV Ekleniş Tarihi | Bilinen Botnet | 2024 Hedef Sektör |
+| CVE | CVSS Score | In KEV? | KEV Added Date | Known Botnet | 2024 Target Sector |
 |---|---|---|---|---|---|
 | CVE-2021-41773 | | | | | |
 | CVE-2021-42013 | | | | | |
 | CVE-2021-4034 | | | | | |
 
-_(Bu tabloyu `fetch_cve_intel.py` çalıştırdıktan sonra gerçek verilerle doldur.)_
+_(Fill this table in with real data after running `fetch_cve_intel.py`.)_
 
-## 2. Resmi Risk Değerlendirmesi vs. Pratik Deneyim
+## 2. Official Risk Assessment vs. Practical Experience
 
-**Soru 1:** CVSS skoru ile senin exploitation deneyiminin zorluk seviyesi
-örtüşüyor mu? Kritik/yüksek skorlu bir zafiyeti gerçekten "kritik"
-zorlukta mı buldun, yoksa beklediğinden daha kolay/zor mu oldu?
+**Question 1:** Does the CVSS score line up with how difficult your
+exploitation experience actually was? Did a critical/high-scored
+vulnerability feel genuinely "critical" in difficulty, or was it
+easier/harder than you expected?
 
-_(cevabın)_
+_(your answer)_
 
-**Soru 2:** KEV kataloğunun "additive" (asla silinmeyen) yapısı, 2021'de
-bulunan bu CVE'lerin 2026'da hâlâ neden tehdit oluşturduğunu nasıl
-açıklıyor? Kendi lab deneyimin, eski bir CVE'nin neden hâlâ "kolay
-hedef" olduğunu somut olarak gösterdi mi?
+**Question 2:** How does the KEV catalog's "additive" (never-deleted)
+structure explain why CVEs discovered in 2021 still pose a threat in
+2026? Did your own lab experience concretely show why an old CVE
+remains an "easy target"?
 
-_(cevabın)_
+_(your answer)_
 
-**Soru 3:** Bu CVE zincirinin tek bir adımı (sadece RCE veya sadece
-priv-esc) yerine, ikisinin birleşimi neden gerçek dünyada daha
-gerçekçi bir saldırı senaryosu temsil ediyor?
+**Question 3:** Why does combining both halves of this CVE chain
+(rather than just RCE alone, or just priv-esc alone) represent a more
+realistic real-world attack scenario?
 
-_(cevabın)_
+_(your answer)_
 
-**Soru 4:** AndroxGh0st botnetinin 2024'te Finansal Hizmetler ve İş
-sektörünü 30.000+ siteyle hedeflediğini biliyoruz. Senin lab
-deneyiminde bu zincirin ne kadar "kolay" veya "zor" olduğunu düşünürsek,
-bu ölçekteki bir kampanyanın varlığını **zafiyetin kolaylığı** mı yoksa
-**yamasız sistem sayısının çokluğu** mu daha çok açıklıyor? İkisi
-arasındaki farkı kendi deneyimine dayanarak tartış.
+**Question 4:** We know the AndroxGh0st botnet targeted the Financial
+Services and Business sectors with 30,000+ sites in 2024. Considering
+how "easy" or "hard" this chain felt in your own lab experience, which
+factor better explains a campaign at this scale — **the
+vulnerability's ease of exploitation**, or **the sheer number of
+unpatched systems**? Discuss the difference between the two, grounded
+in your own experience.
 
-_(cevabın)_
+_(your answer)_
 
-## 3. Savunma Önerileri (Defensive Takeaway)
+## 3. Defensive Takeaways
 
-Bu lab'dan çıkardığın, gerçek bir ortamda bu zinciri önlemek için
-alınabilecek 3 somut önlem:
+Three concrete measures you'd take from this lab to prevent this
+chain in a real environment:
 
 1.
 2.

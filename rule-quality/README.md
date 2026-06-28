@@ -1,43 +1,45 @@
 # RULE QUALITY ANALYZER
-### OBSIDIAN PROTOCOL / "Kuralımız Var" ile "Kuralımız İyi" Arasındaki Fark
+### OBSIDIAN PROTOCOL / The Gap Between "We Have a Rule" and "Our Rule Is Good"
 
 ## Problem
 
-Sigma kuralı yazmak kolaydır; iyi bir Sigma kuralı yazmak zordur.
-Kurumlar genelde "X tane Sigma kuralımız var" sayısıyla övünür ama
-bu kuralların false-positive riski, performans maliyeti veya
-eksik alanları hakkında sistematik bir değerlendirme yapılmaz.
+Writing a Sigma rule is easy; writing a *good* Sigma rule is hard.
+Organizations often take pride in "we have X Sigma rules" as a raw
+count, without any systematic assessment of those rules' false-
+positive risk, performance cost, or missing fields.
 
-## Çözüm
+## Solution
 
-`analyze_rules.py`, `detection/sigma/*.yml` dosyalarını statik olarak
-analiz eder ve her kural için beş boyutta puan üretir:
+`analyze_rules.py` statically analyzes the files in
+`detection/sigma/*.yml` and produces a score across five dimensions
+for each rule:
 
-| Boyut | Ne Ölçer |
+| Dimension | What It Measures |
 |---|---|
-| False Positive Risk | `falsepositives` alanının doluluğu ve detay seviyesi |
-| Performance Cost | `contains`/`regex` deseni sayısı (tam eşleştirmeye göre maliyet) |
-| Coverage | MITRE technique + CVE + dış referans yoğunluğu |
-| Missing Fields | Sigma spesifikasyonunun zorunlu/önerilen alanları |
-| Recommendations | Yukarıdaki dört boyuttan türetilen somut iyileştirme önerileri |
+| False Positive Risk | How complete and detailed the `falsepositives` field is |
+| Performance Cost | The number of `contains`/`regex` patterns used (more costly than exact matches) |
+| Coverage | Density of MITRE technique + CVE + external reference metadata |
+| Missing Fields | Required/recommended fields from the Sigma specification |
+| Recommendations | Concrete improvement suggestions derived from the four dimensions above |
 
-## Kullanım
+## Usage
 
 ```bash
 python3 rule-quality/analyze_rules.py
 ```
 
-## Kendi Kuralımızı Kendi Aracımızla Test Ettik
+## We Tested Our Own Rules With Our Own Tool
 
-Bu motor, projenin kendi WARDEN modülündeki iki Sigma kuralına karşı
-çalıştırıldı — gerçek çıktı `rule-quality/output/rule_quality_report.json`'da.
-Bu "kendi ürettiğimiz şeyi kendi standardımızla denetlemek" pratiği,
-kalite güvencesinin temel bir ilkesidir.
+This engine was run against the project's own two Sigma rules in the
+WARDEN module — the real output is in
+`rule-quality/output/rule_quality_report.json`. This practice of
+"auditing what we built against our own standard" is a core
+quality-assurance principle.
 
-## Bilinen Sınırlama
+## Known Limitation
 
-Performans maliyeti tahmini basit bir sezgisel (contains/regex sayma)
-— gerçek bir SIEM'in query planner'ı (örn. Splunk'ın search head
-maliyet tahmini) çok daha karmaşık faktörlere (index boyutu, zaman
-aralığı, alan kardinalitesi) bakar. Bu motor "yaklaşık bir sinyal"
-veriyor, kesin bir benchmark değil.
+The performance cost estimate is a simple heuristic (counting
+contains/regex patterns) — a real SIEM's query planner (e.g. Splunk's
+search head cost estimation) considers far more complex factors
+(index size, time range, field cardinality). This engine provides "an
+approximate signal," not a precise benchmark.

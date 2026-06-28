@@ -1,27 +1,29 @@
-# WARDEN MODÜLÜ — Detection Engineering
-### OBSIDIAN PROTOCOL / Bu Saldırı Zinciri Nasıl Yakalanır
+# WARDEN MODULE — Detection Engineering
+### OBSIDIAN PROTOCOL / How This Attack Chain Gets Caught
 
-Bu klasör, VECTOR-I ve VECTOR-II için **gerçek, çalıştırılabilir
-tespit kuralları** içerir. Amaç sadece "nasıl saldırdım" değil, "bir
-SOC analisti bunu nasıl görür" sorusunu cevaplamak.
+This folder contains **real, executable detection rules** for VECTOR-I
+and VECTOR-II. The goal isn't just "how did I attack" — it's
+answering "how would a SOC analyst actually see this."
 
-## Neden İki Farklı Tespit Stratejisi Var
+## Why There Are Two Different Detection Strategies
 
-| CVE | Log Kaynağı | Güvenilirlik | Neden |
+| CVE | Log Source | Reliability | Why |
 |---|---|---|---|
-| CVE-2021-41773/42013 | Apache access log | Yüksek | İstek HTTP seviyesinde, her zaman loglanır |
-| CVE-2021-4034 (PwnKit) | **auditd (syscall)**, auth.log DEĞİL | auth.log: Düşük / auditd: Yüksek | Exploit, pkexec'in kimlik doğrulama+log kodunun **önüne** geçiyor |
+| CVE-2021-41773/42013 | Apache access log | High | The request happens at the HTTP level, so it's always logged |
+| CVE-2021-4034 (PwnKit) | **auditd (syscall)**, NOT auth.log | auth.log: Low / auditd: High | The exploit runs **ahead of** pkexec's authentication+logging code |
 
-PwnKit kısmı özellikle önemli bir öğrenme noktası: çoğu kişi "auth.log'a
-bakarım, pkexec çalıştırıldıysa görürüm" diye düşünür. **Bu yanlış.**
-Zafiyet, pkexec'in normal kimlik doğrulama/logging akışına girmeden
-önce tetikleniyor. Bu yüzden `detection/sigma/pwnkit_cve_2021_4034.yml`
-auditd syscall seviyesini birincil sinyal olarak kullanıyor, auth.log'u
-sadece "varsa bonus" olarak işaretliyor.
+The PwnKit part is a particularly important lesson: most people
+assume "I'll check auth.log, I'll see it if pkexec ran." **That's
+wrong.** The vulnerability is triggered before pkexec ever enters its
+normal authentication/logging flow. That's why
+`detection/sigma/pwnkit_cve_2021_4034.yml` uses the auditd syscall
+level as its primary signal, and treats auth.log as a "bonus if
+present" signal at best.
 
-## Kurulum: auditd ile PwnKit Tespiti
+## Detection Setup: PwnKit via auditd
 
-Range'in `target-49` (container: `obsidian-target-49`) servisinde bu tespiti test etmek için:
+To test this detection against the range's `target-49` service
+(container: `obsidian-target-49`):
 
 ```bash
 docker exec -it obsidian-target-49 bash
@@ -30,45 +32,45 @@ echo "-w /usr/bin/pkexec -p x -k pkexec_exec" >> /etc/audit/rules.d/pwnkit.rules
 service auditd restart
 ```
 
-PwnKit exploit'ini çalıştırdıktan sonra:
+After running the PwnKit exploit:
 ```bash
 ausearch -k pkexec_exec | grep GCONV_PATH
 ```
 
-Bu komut, walkthrough'un Aşama 5'inde elde ettiğin root shell'in
-auditd'de nasıl göründüğünü gösterir.
+This command shows how the root shell obtained in Stage 5 of the
+walkthrough actually appears inside auditd.
 
-## Sigma Kurallarını Test Etme
+## Testing the Sigma Rules
 
-Kurallar standart Sigma formatında yazıldı, [Sigma CLI](https://github.com/SigmaHQ/sigma-cli)
-veya herhangi bir Sigma-destekli SIEM'e (Splunk, Elastic, Wazuh) import
-edilebilir:
+The rules are written in standard Sigma format and can be imported
+into the [Sigma CLI](https://github.com/SigmaHQ/sigma-cli) or any
+Sigma-compatible SIEM (Splunk, Elastic, Wazuh):
 
 ```bash
 pip install sigma-cli --break-system-packages
 sigma convert -t splunk detection/sigma/apache_path_traversal_cve_2021_41773.yml
 ```
 
-## YARA Kuralları
+## YARA Rules
 
-`detection/yara/pwnkit_artifacts.yar`, PwnKit exploit'inin diskte
-bıraktığı artifact'leri (sahte `.so` dosyası, `gconv-modules` taklit
-dosyası) tarar. Lab'da exploit'i çalıştırdıktan sonra test et:
+`detection/yara/pwnkit_artifacts.yar` scans for artifacts the PwnKit
+exploit leaves on disk (a forged `.so` file, a fake `gconv-modules`
+file). Test it after running the exploit in the lab:
 
 ```bash
 yara detection/yara/pwnkit_artifacts.yar /tmp/ -r
 ```
 
-## Patch / Kalıcı Çözüm
+## Patch / Permanent Remediation
 
-| CVE | Kalıcı Çözüm |
+| CVE | Permanent Fix |
 |---|---|
-| CVE-2021-41773/42013 | Apache'yi **2.4.51+**'a yükselt. Geçici önlem: `Require all denied` varsayılanını koru, gereksiz `Alias`/`ScriptAlias` dizinlerini kapat |
-| CVE-2021-4034 | `apt-get update && apt-get install policykit-1` (yamalı sürüm). Acil geçici önlem: `chmod 0755 /usr/bin/pkexec` (SUID bitini kaldır — pkexec'i kullanılamaz yapar ama zafiyeti kapatır) |
+| CVE-2021-41773/42013 | Upgrade Apache to **2.4.51+**. Interim mitigation: keep the `Require all denied` default, disable unnecessary `Alias`/`ScriptAlias` directories |
+| CVE-2021-4034 | `apt-get update && apt-get install policykit-1` (patched version). Emergency interim mitigation: `chmod 0755 /usr/bin/pkexec` (removes the SUID bit — makes pkexec unusable but closes the vulnerability) |
 
-## MITRE ATT&CK Eşlemesi
+## MITRE ATT&CK Mapping
 
-| Aşama | Teknik | ID |
+| Stage | Technique | ID |
 |---|---|---|
 | Initial Access | Exploit Public-Facing Application | T1190 |
 | Discovery | File and Directory Discovery | T1083 |

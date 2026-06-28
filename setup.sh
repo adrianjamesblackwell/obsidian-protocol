@@ -1,18 +1,18 @@
 #!/bin/bash
 # ============================================================
-# setup.sh — OBSIDIAN PROTOCOL Range Devreye Alma
+# setup.sh — OBSIDIAN PROTOCOL Range Deployment
 #
-# Kullanım: ./setup.sh
+# Usage: ./setup.sh
 #
-# Bu script:
-#   1. Docker/docker-compose'un kurulu olduğunu doğrular
-#   2. İmajları build eder
-#   3. Range'i (target-49 + operator) başlatır
-#   4. target-49'un HTTP'ye cevap verdiğini doğrular
-#   5. operator container'ından target-49'a DNS çözümlemesinin
-#      çalıştığını doğrular VE internete çıkışın kapalı olduğunu
-#      kanıtlar (izolasyon garantisinin gerçekten çalıştığını
-#      otomatik test eder, sadece belgelemekle kalmaz)
+# This script:
+#   1. Verifies Docker/docker-compose are installed
+#   2. Builds the images
+#   3. Brings up the range (target-49 + operator)
+#   4. Verifies target-49 responds over HTTP
+#   5. Verifies DNS resolution works from the operator container to
+#      target-49, AND proves that outbound internet access is
+#      blocked (the isolation guarantee is actually tested
+#      automatically here, not just documented)
 # ============================================================
 set -e
 
@@ -27,17 +27,17 @@ BANNER="
 "
 echo "$BANNER"
 echo "=================================================="
-echo "  Range devreye alınıyor — VECTOR-I / VECTOR-II"
+echo "  Bringing up the range — VECTOR-I / VECTOR-II"
 echo "=================================================="
 
-# --- Ön koşul kontrolü ---
+# --- Prerequisite check ---
 if ! command -v docker &> /dev/null; then
-    echo "[!] Docker bulunamadı. Lütfen Docker'ı kurun: https://docs.docker.com/get-docker/"
+    echo "[!] Docker not found. Please install Docker: https://docs.docker.com/get-docker/"
     exit 1
 fi
 
 if ! docker compose version &> /dev/null && ! command -v docker-compose &> /dev/null; then
-    echo "[!] docker-compose bulunamadı."
+    echo "[!] docker-compose not found."
     exit 1
 fi
 
@@ -46,44 +46,44 @@ if ! docker compose version &> /dev/null; then
     COMPOSE_CMD="docker-compose"
 fi
 
-echo "[*] Docker bulundu, build başlıyor..."
+echo "[*] Docker found, starting build..."
 $COMPOSE_CMD build
 
-echo "[*] Range başlatılıyor (target-49 + operator)..."
+echo "[*] Starting the range (target-49 + operator)..."
 $COMPOSE_CMD up -d
 
-echo "[*] target-49 sağlık kontrolü bekleniyor (en fazla 60sn)..."
+echo "[*] Waiting for target-49 health check (up to 60s)..."
 ATTEMPTS=0
 until [ "$(docker inspect -f '{{.State.Health.Status}}' obsidian-target-49 2>/dev/null)" == "healthy" ]; do
     ATTEMPTS=$((ATTEMPTS+1))
     if [ $ATTEMPTS -ge 12 ]; then
-        echo "[!] target-49 60 saniye içinde healthy olmadı. Logları kontrol et:"
+        echo "[!] target-49 did not become healthy within 60 seconds. Check the logs:"
         echo "    docker logs obsidian-target-49"
         exit 1
     fi
     sleep 5
 done
-echo "[+] target-49 sağlıklı ve HTTP'ye cevap veriyor."
+echo "[+] target-49 is healthy and responding over HTTP."
 
-echo "[*] Range izolasyonu doğrulanıyor (operator -> target-49 DNS çözümlemesi)..."
+echo "[*] Verifying range isolation (operator -> target-49 DNS resolution)..."
 docker exec obsidian-operator getent hosts target-49 || {
-    echo "[!] DNS çözümlemesi başarısız - network konfigürasyonunu kontrol et."
+    echo "[!] DNS resolution failed - check the network configuration."
     exit 1
 }
-echo "[+] İç network çözümlemesi çalışıyor."
+echo "[+] Internal network resolution is working."
 
-echo "[*] İnternete çıkış engellendiğini doğrulama (bu komutun BAŞARISIZ olması beklenir)..."
+echo "[*] Verifying internet access is blocked (this command is EXPECTED to fail)..."
 if docker exec obsidian-operator timeout 3 curl -s https://1.1.1.1 &> /dev/null; then
-    echo "[!] UYARI: operator container internete çıkabiliyor! docker-compose.yml'deki"
-    echo "    'internal: true' ayarını kontrol et."
+    echo "[!] WARNING: the operator container can reach the internet! Check the"
+    echo "    'internal: true' setting in docker-compose.yml."
 else
-    echo "[+] İzolasyon doğrulandı: operator container internete çıkamıyor."
+    echo "[+] Isolation verified: the operator container cannot reach the internet."
 fi
 
 echo ""
 echo "=================================================="
-echo "  Range hazır."
-echo "  OPERATOR kutusuna bağlan:"
+echo "  Range is ready."
+echo "  Connect to the OPERATOR box:"
 echo "    docker exec -it obsidian-operator bash"
-echo "  Sonraki adım: docs/walkthrough.md (VECTOR-I başlangıcı)."
+echo "  Next step: docs/walkthrough.md (start of VECTOR-I)."
 echo "=================================================="

@@ -1,39 +1,40 @@
 # ADVERSARY EMULATION QUALITY SCORE
-### OBSIDIAN PROTOCOL / Red Team Operasyonunun Kalitesini Ölçmek
+### OBSIDIAN PROTOCOL / Measuring the Quality of a Red Team Operation
 
 ## Problem
 
-Kurumlar Red Team operasyonu yapar ama operasyonun **kalitesini**
-ölçmez. "Red Team yaptık" ≠ "iyi bir Red Team operasyonu yaptık."
+Organizations run Red Team operations but rarely measure the
+**quality** of the operation itself. "We ran a Red Team exercise" is
+not the same claim as "we ran a *good* Red Team exercise."
 
-## Dört Boyut
+## Four Dimensions
 
-| Boyut | Ölçer | Kaynak |
+| Dimension | Measures | Source |
 |---|---|---|
-| Attack Diversity | Kaç farklı MITRE technique kullanıldı | Correlation Engine |
-| MITRE Matrix Coverage | Bunların 216 tekniğin tamamına oranı | Correlation Engine |
-| Noise Level | Operasyon ne kadar "odaklı" (az+yüksek-confidence) | Correlation Engine confidence skorları |
-| Detection Success | WARDEN bu emulasyonu ne ölçüde yakaladı | Purple Team |
+| Attack Diversity | How many distinct MITRE techniques were used | Correlation Engine |
+| MITRE Matrix Coverage | Those techniques as a fraction of all 216 | Correlation Engine |
+| Noise Level | How "focused" the operation was (few, high-confidence actions) | Correlation Engine confidence scores |
+| Detection Success | How much of this emulation WARDEN actually caught | Purple Team |
 
-## Bu Projenin Kendi Notu: "C"
+## This Project's Own Grade: "C"
 
-OBSIDIAN PROTOCOL'ün kendi emulation skoru bilinçli olarak düşük
-çıkıyor (Coverage %1.39, genel not "C") — bu bir hata değil, **dürüst
-bir ölçüm**: proje sadece 2 CVE/3 teknik kapsıyor, MITRE'nin 216
-tekniğinin tamamına göre bu küçük bir kapsam. Bu motor, kendi
-kapsamını şişirip yapay olarak yüksek not vermek yerine gerçek oranı
-gösteriyor.
+OBSIDIAN PROTOCOL's own emulation score comes out deliberately low
+(1.39% Coverage, overall grade "C") — this isn't a bug, it's **an
+honest measurement**: the project covers only 2 CVEs / 3 techniques,
+which is a small fraction of MITRE's full 216-technique matrix. Rather
+than inflating its own scope to produce an artificially high grade,
+this engine reports the real ratio.
 
-## Kullanım
+## Usage
 
 ```bash
 python3 emulation-score/emulation_score.py
 ```
 
-## Bilinen Sınırlama
+## Known Limitation
 
-`compute_noise_level` basit bir confidence-oranı sezgiselidir - gerçek
-"gürültü" ölçümü (örn. operasyonun SIEM'de kaç farklı alarm tetikledi,
-analist triage süresi) çok daha zengin bir veri seti gerektirir. Bu
-motor, var olan Correlation Engine confidence verisinden türetilebilen
-basit bir proxy kullanıyor.
+`compute_noise_level` is a simple confidence-ratio heuristic — a real
+"noise" measurement (e.g. how many distinct alerts the operation
+triggered in a SIEM, analyst triage time) would require a much richer
+dataset. This engine uses a simpler proxy derived from the existing
+Correlation Engine confidence data.

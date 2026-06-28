@@ -3,24 +3,24 @@ version: "3.8"
 # ============================================================
 # OBSIDIAN PROTOCOL — ISOLATED RANGE DEFINITION
 #
-# İZOLASYON GARANTİSİ:
-#   - "obsidian-range" internal:true olarak tanımlı -> bu ağdaki
-#     hiçbir container internete veya host'un diğer ağlarına
-#     çıkış yapamaz.
-#   - target-49 dışarıya port açmaz (sadece range içinde
-#     erişilebilir). Test sırasında host'tan erişmek istersen
-#     aşağıdaki "ports" satırını aç, ama bunu sadece kendi izole
-#     makinende / VM'inde yap.
+# ISOLATION GUARANTEE:
+#   - "obsidian-range" is defined as internal:true -> no container
+#     on this network can reach the internet or any other network
+#     on the host.
+#   - target-49 does not expose any port externally (it's only
+#     reachable from inside the range). If you want host access for
+#     manual testing, uncomment the "ports" line below — but only do
+#     this on your own isolated machine / VM.
 # ============================================================
 
 networks:
   obsidian-range:
-    internal: true   # <-- KRİTİK: bu olmadan container internete çıkabilir
+    internal: true   # <-- CRITICAL: without this, the container could reach the internet
     driver: bridge
 
 services:
-  # TARGET-49 — VECTOR-I/II'nin uygulandığı hedef sistem
-  # (Apache 2.4.49 + PwnKit zafiyetli polkit sürümü)
+  # TARGET-49 — the target system VECTOR-I/II are run against
+  # (Apache 2.4.49 + the vulnerable polkit version exploited by PwnKit)
   target-49:
     build:
       context: ./docker/target-49
@@ -29,9 +29,9 @@ services:
     networks:
       - obsidian-range
     # ports:
-    #   - "8080:80"   # Sadece host'tan manuel test için, isteğe bağlı
+    #   - "8080:80"   # Optional, for manual testing from the host only
     cap_add:
-      - AUDIT_CONTROL   # auditd'nin VECTOR-II syscall'larını izlemesi için gerekli
+      - AUDIT_CONTROL   # required so auditd can monitor VECTOR-II's syscalls
       - AUDIT_WRITE
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]
@@ -41,7 +41,7 @@ services:
       start_period: 10s
     restart: "no"
 
-  # OPERATOR — saldırı zincirinin yürütüldüğü kutu
+  # OPERATOR — the box the attack chain is executed from
   operator:
     build:
       context: ./docker/operator

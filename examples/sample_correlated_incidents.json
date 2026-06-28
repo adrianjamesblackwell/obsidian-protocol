@@ -17,13 +17,13 @@
       "VECTOR-I"
     ],
     "confidence": 95.0,
-    "confidence_rationale": "Tam eşleşme: bilinen kill-chain paterni T1190 -> T1059",
+    "confidence_rationale": "Exact match: known kill-chain pattern T1190 -> T1059",
     "severity": "HIGH",
     "raw_event_ids": [
-      "ef203db5-1e19-4e2b-b03d-6a60c708a465",
-      "cc5f1d5c-0154-4e15-9322-9a6e6800b1df"
+      "58313a2a-561e-47af-bf9a-3976c1fc0709",
+      "2bd1f0e9-2ed5-491c-a1ad-a3698c973f70"
     ],
-    "narrative": "apache_access_log kaynağından 'initial_access' (CVE-2021-41773) ardından apache_access_log kaynağından 'execution' (CVE-2021-42013)"
+    "narrative": "'initial_access' from apache_access_log (CVE-2021-41773) followed by 'execution' from apache_access_log (CVE-2021-42013)"
   },
   {
     "incident_id": "e023c12b",
@@ -41,17 +41,17 @@
       "VECTOR-II"
     ],
     "confidence": 20.0,
-    "confidence_rationale": "Tek bir teknik gözlendi, zincir oluşturulamadı",
+    "confidence_rationale": "A single technique observed, no chain could be formed",
     "severity": "LOW",
     "raw_event_ids": [
-      "aaeb5b67-e320-4f84-a1dd-c39ab213b31e"
+      "5493bedb-94c4-4435-b27f-ddbba046ea66"
     ],
-    "narrative": "auditd kaynağından 'privilege_escalation' (CVE-2021-4034)"
+    "narrative": "'privilege_escalation' from auditd (CVE-2021-4034)"
   },
   {
-    "incident_id": "813ab05d",
-    "first_seen": "2026-06-27T11:48:57.967229+00:00",
-    "last_seen": "2026-06-27T11:48:57.967267+00:00",
+    "incident_id": "3b8fb1cb",
+    "first_seen": "2026-06-28T13:08:06.005955+00:00",
+    "last_seen": "2026-06-28T13:08:06.006034+00:00",
     "actor_key": "user:1000",
     "raw_event_count": 2,
     "mitre_chain": [
@@ -65,12 +65,12 @@
       "VECTOR-II"
     ],
     "confidence": 40.0,
-    "confidence_rationale": "Birden fazla teknik var (T1548.001, T1548.001) ama tanınan bir zincire uymuyor",
+    "confidence_rationale": "Multiple techniques present (T1548.001, T1548.001) but doesn't fit any recognized chain",
     "severity": "MEDIUM",
     "raw_event_ids": [
-      "e2608e2e-a69b-4203-b89d-4117089a994d",
-      "85c76e2c-32c0-43b7-b8b1-8d3de496c2d0"
+      "52f9037b-8b2e-4ea2-8907-7701bbe59ba2",
+      "6c957d0a-d234-454c-a9fa-a235c2cbec52"
     ],
-    "narrative": "ebpf kaynağından 'privilege_escalation' (CVE-2021-4034) ardından ebpf kaynağından 'privilege_escalation' (CVE-2021-4034)"
+    "narrative": "'privilege_escalation' from ebpf (CVE-2021-4034) followed by 'privilege_escalation' from ebpf (CVE-2021-4034)"
   }
 ]

@@ -1,15 +1,15 @@
 {
   "type": "bundle",
-  "id": "bundle--85baadd3-7f53-4934-94c7-41cc2c58134f",
+  "id": "bundle--0e5a1662-c30c-426b-a297-92369b99091b",
   "objects": [
     {
       "type": "vulnerability",
       "spec_version": "2.1",
-      "id": "vulnerability--3d63816a-3aef-4391-8523-8fb6acbbb5be",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "vulnerability--4a8ae1b0-9d7c-4b52-b497-cd7b655a6e8b",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "name": "CVE-2021-41773",
-      "description": "Apache HTTP Server 2.4.49 path traversal vulnerability. Yetersiz patch nedeniyle CVE-2021-42013 ile tamamlandı.",
+      "description": "Apache HTTP Server 2.4.49 path traversal vulnerability. Completed by CVE-2021-42013 due to an incomplete patch.",
       "external_references": [
         {
           "source_name": "cve",
@@ -21,11 +21,11 @@
     {
       "type": "vulnerability",
       "spec_version": "2.1",
-      "id": "vulnerability--79ee4adf-4a5a-421f-90be-05945f0d6e79",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "vulnerability--4539e787-59e7-45fb-bb25-61f34f091cc7",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "name": "CVE-2021-42013",
-      "description": "Apache HTTP Server 2.4.49/2.4.50 path traversal ve RCE. CVE-2021-41773'ün eksik patch'inin tamamlanmış hali.",
+      "description": "Apache HTTP Server 2.4.49/2.4.50 path traversal and RCE. The completed form of CVE-2021-41773's incomplete patch.",
       "external_references": [
         {
           "source_name": "cve",
@@ -37,11 +37,11 @@
     {
       "type": "vulnerability",
       "spec_version": "2.1",
-      "id": "vulnerability--1d53986f-685a-4839-b249-eaa76f81d0d9",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "vulnerability--ebd3884e-dd2e-447d-ba30-af5c37c19fe6",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "name": "CVE-2021-4034",
-      "description": "polkit pkexec local privilege escalation (PwnKit). argc=0 mantık hatası, GCONV_PATH environment variable manipülasyonu.",
+      "description": "polkit pkexec local privilege escalation (PwnKit). An argc=0 logic flaw, exploited via GCONV_PATH environment variable manipulation.",
       "external_references": [
         {
           "source_name": "cve",
@@ -53,11 +53,11 @@
     {
       "type": "attack-pattern",
       "spec_version": "2.1",
-      "id": "attack-pattern--57d4f6b6-0271-46d1-8c94-d5e54b5e8979",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "attack-pattern--50fcfa5c-38f2-44e3-ac97-108da84d943c",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "name": "Exploit Public-Facing Application (VECTOR-I)",
-      "description": "Apache path traversal üzerinden ilk erişim.",
+      "description": "Initial access via Apache path traversal.",
       "external_references": [
         {
           "source_name": "mitre-attack",
@@ -69,11 +69,11 @@
     {
       "type": "attack-pattern",
       "spec_version": "2.1",
-      "id": "attack-pattern--16a70825-b73b-483d-b0b8-e5eac62c4b3a",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "attack-pattern--67bcb8c7-6d4a-4d26-b353-524d0e47c575",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "name": "Command and Scripting Interpreter (VECTOR-I RCE)",
-      "description": "CGI yönlendirme ile komut çalıştırma.",
+      "description": "Command execution via CGI redirection.",
       "external_references": [
         {
           "source_name": "mitre-attack",
@@ -85,11 +85,11 @@
     {
       "type": "attack-pattern",
       "spec_version": "2.1",
-      "id": "attack-pattern--10f9d7f4-8452-4ad7-ba8b-5a488f25c9e2",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "attack-pattern--30606352-b262-46ea-ab1a-835118e93eea",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "name": "Abuse Elevation Control Mechanism: Setuid/Setgid (VECTOR-II)",
-      "description": "PwnKit ile pkexec/SUID istismarı yoluyla root'a çıkış.",
+      "description": "Escalation to root via PwnKit's pkexec/SUID exploitation.",
       "external_references": [
         {
           "source_name": "mitre-attack",
@@ -101,59 +101,59 @@
     {
       "type": "indicator",
       "spec_version": "2.1",
-      "id": "indicator--03aea00a-51c4-41f3-a3a9-d02dbe564f62",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "indicator--67b795c9-1427-4000-bceb-b9d832e762ad",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "name": "Apache Path Traversal - Encoded Double-Dot Sequence",
-      "description": "Encode edilmiş path traversal deseninin /cgi-bin/ ScriptAlias path'i üzerinden kullanılması. WARDEN/Sigma kuralı: detection/sigma/apache_path_traversal_cve_2021_41773.yml",
+      "description": "An encoded path traversal pattern used via the /cgi-bin/ ScriptAlias path. WARDEN/Sigma rule: detection/sigma/apache_path_traversal_cve_2021_41773.yml",
       "indicator_types": [
         "malicious-activity"
       ],
       "pattern_type": "stix",
       "pattern_version": "2.1",
       "pattern": "[network-traffic:extensions.http-request-ext.request_value MATCHES '.*%2e%2e/.*cgi-bin.*']",
-      "valid_from": "2026-06-27T11:49:03.762Z"
+      "valid_from": "2026-06-28T13:08:06.270Z"
     },
     {
       "type": "indicator",
       "spec_version": "2.1",
-      "id": "indicator--03f63342-0111-49cc-96d4-4dfe6b6fec55",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "indicator--3a4c71c9-aa07-4658-8238-555efa46bddf",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "name": "PwnKit pkexec argc=0 Exploitation",
-      "description": "pkexec'in argümansız (argc=0) çağrılması ve GCONV_PATH environment variable manipülasyonu. WARDEN/Sigma kuralı: detection/sigma/pwnkit_cve_2021_4034.yml",
+      "description": "pkexec invoked with no arguments (argc=0) combined with GCONV_PATH environment variable manipulation. WARDEN/Sigma rule: detection/sigma/pwnkit_cve_2021_4034.yml",
       "indicator_types": [
         "malicious-activity"
       ],
       "pattern_type": "stix",
       "pattern_version": "2.1",
       "pattern": "[process:name = 'pkexec' AND process:command_line = '' AND process:environment_variables.GCONV_PATH MATCHES '.*']",
-      "valid_from": "2026-06-27T11:49:03.762Z"
+      "valid_from": "2026-06-28T13:08:06.270Z"
     },
     {
       "type": "indicator",
       "spec_version": "2.1",
-      "id": "indicator--9b7e1d6f-2312-4851-b76c-066dcd0f5e2e",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "indicator--74c7e300-0d64-423a-9e51-38deb6893911",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "name": "AndroxGh0st Botnet - .env Scanning Pattern",
-      "description": "FBI/CISA AA24-016A danışma belgesinde tanımlanan AndroxGh0st botnet IOC deseni (.env dosya tarama, PHPUnit eval-stdin.php exploitation denemesi).",
+      "description": "The AndroxGh0st botnet IOC pattern described in the FBI/CISA AA24-016A advisory (.env file scanning, PHPUnit eval-stdin.php exploitation attempt).",
       "indicator_types": [
         "malicious-activity"
       ],
       "pattern_type": "stix",
       "pattern_version": "2.1",
       "pattern": "[url:value MATCHES '.*\\\\.env$' OR url:value MATCHES '.*eval-stdin\\\\.php$']",
-      "valid_from": "2026-06-27T11:49:03.762Z"
+      "valid_from": "2026-06-28T13:08:06.270Z"
     },
     {
       "type": "malware",
       "spec_version": "2.1",
-      "id": "malware--9828e722-8189-42a8-b3cc-c45b6a4df125",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "malware--810f9799-4caa-49ac-a408-941262a68b5e",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "name": "AndroxGh0st",
-      "description": "Python tabanlı botnet, ilk olarak Aralık 2022'de Lacework tarafından tespit edildi. Laravel .env dosyalarını tarayarak AWS/Microsoft 365/SendGrid/Twilio kimlik bilgilerini çalmaya çalışır. CVE-2021-41773, CVE-2017-9841 ve CVE-2018-15133'ü kullanır. Kaynak: CISA/FBI AA24-016A.",
+      "description": "A Python-based botnet, first identified by Lacework in December 2022. Scans Laravel .env files attempting to steal AWS/Microsoft 365/SendGrid/Twilio credentials. Uses CVE-2021-41773, CVE-2017-9841, and CVE-2018-15133. Source: CISA/FBI AA24-016A.",
       "is_family": true,
       "malware_types": [
         "bot"
@@ -162,90 +162,90 @@
     {
       "type": "relationship",
       "spec_version": "2.1",
-      "id": "relationship--14eb4081-5504-4ab2-aebf-bb2c47f48f90",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "relationship--8ac10587-5e02-4f5f-8bf6-b7bbfe128a75",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "relationship_type": "indicates",
-      "source_ref": "indicator--03aea00a-51c4-41f3-a3a9-d02dbe564f62",
-      "target_ref": "vulnerability--3d63816a-3aef-4391-8523-8fb6acbbb5be",
-      "description": "CVE-2021-41773 exploitation göstergesi"
+      "source_ref": "indicator--67b795c9-1427-4000-bceb-b9d832e762ad",
+      "target_ref": "vulnerability--4a8ae1b0-9d7c-4b52-b497-cd7b655a6e8b",
+      "description": "Indicator of CVE-2021-41773 exploitation"
     },
     {
       "type": "relationship",
       "spec_version": "2.1",
-      "id": "relationship--23cc6656-b20a-42d4-9427-56f2fbdd9284",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "relationship--830a700f-f2b4-4011-a7f1-15c9750e7bf0",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "relationship_type": "indicates",
-      "source_ref": "indicator--03aea00a-51c4-41f3-a3a9-d02dbe564f62",
-      "target_ref": "vulnerability--79ee4adf-4a5a-421f-90be-05945f0d6e79",
-      "description": "CVE-2021-42013 exploitation göstergesi"
+      "source_ref": "indicator--67b795c9-1427-4000-bceb-b9d832e762ad",
+      "target_ref": "vulnerability--4539e787-59e7-45fb-bb25-61f34f091cc7",
+      "description": "Indicator of CVE-2021-42013 exploitation"
     },
     {
       "type": "relationship",
       "spec_version": "2.1",
-      "id": "relationship--1d5f9a02-4d4f-46f3-9072-06e1686cb5da",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "relationship--17857351-1775-4b2e-bcdb-acb21aaa3141",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "relationship_type": "indicates",
-      "source_ref": "indicator--03f63342-0111-49cc-96d4-4dfe6b6fec55",
-      "target_ref": "vulnerability--1d53986f-685a-4839-b249-eaa76f81d0d9",
-      "description": "CVE-2021-4034 exploitation göstergesi"
+      "source_ref": "indicator--3a4c71c9-aa07-4658-8238-555efa46bddf",
+      "target_ref": "vulnerability--ebd3884e-dd2e-447d-ba30-af5c37c19fe6",
+      "description": "Indicator of CVE-2021-4034 exploitation"
     },
     {
       "type": "relationship",
       "spec_version": "2.1",
-      "id": "relationship--1b64728f-64ac-4e6f-805b-608735c8c0c2",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "relationship--f487ba20-62c5-4598-8490-ae924e2dcaf2",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "relationship_type": "exploits",
-      "source_ref": "vulnerability--3d63816a-3aef-4391-8523-8fb6acbbb5be",
-      "target_ref": "attack-pattern--57d4f6b6-0271-46d1-8c94-d5e54b5e8979",
+      "source_ref": "vulnerability--4a8ae1b0-9d7c-4b52-b497-cd7b655a6e8b",
+      "target_ref": "attack-pattern--50fcfa5c-38f2-44e3-ac97-108da84d943c",
       "description": "VECTOR-I initial access"
     },
     {
       "type": "relationship",
       "spec_version": "2.1",
-      "id": "relationship--a2c95453-7b81-4db1-81d8-20f395fbc5e1",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "relationship--c8a72f16-37c0-4a24-8572-07a45e3fdf63",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "relationship_type": "exploits",
-      "source_ref": "vulnerability--79ee4adf-4a5a-421f-90be-05945f0d6e79",
-      "target_ref": "attack-pattern--16a70825-b73b-483d-b0b8-e5eac62c4b3a",
+      "source_ref": "vulnerability--4539e787-59e7-45fb-bb25-61f34f091cc7",
+      "target_ref": "attack-pattern--67bcb8c7-6d4a-4d26-b353-524d0e47c575",
       "description": "VECTOR-I execution/RCE"
     },
     {
       "type": "relationship",
       "spec_version": "2.1",
-      "id": "relationship--1a17f23c-71d0-4196-904d-a9a8bb842afe",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "relationship--a0c3d49b-6697-45a1-a8d8-591a30ca762f",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "relationship_type": "exploits",
-      "source_ref": "vulnerability--1d53986f-685a-4839-b249-eaa76f81d0d9",
-      "target_ref": "attack-pattern--10f9d7f4-8452-4ad7-ba8b-5a488f25c9e2",
+      "source_ref": "vulnerability--ebd3884e-dd2e-447d-ba30-af5c37c19fe6",
+      "target_ref": "attack-pattern--30606352-b262-46ea-ab1a-835118e93eea",
       "description": "VECTOR-II privilege escalation"
     },
     {
       "type": "relationship",
       "spec_version": "2.1",
-      "id": "relationship--f23c41bd-643d-4c6c-ae4b-7a6044bafb32",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "relationship--3d768568-6f14-473a-84f2-46166db95df4",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "relationship_type": "uses",
-      "source_ref": "malware--9828e722-8189-42a8-b3cc-c45b6a4df125",
-      "target_ref": "vulnerability--3d63816a-3aef-4391-8523-8fb6acbbb5be",
-      "description": "AndroxGh0st CVE-2021-41773'ü kullanıyor (CISA AA24-016A)"
+      "source_ref": "malware--810f9799-4caa-49ac-a408-941262a68b5e",
+      "target_ref": "vulnerability--4a8ae1b0-9d7c-4b52-b497-cd7b655a6e8b",
+      "description": "AndroxGh0st uses CVE-2021-41773 (CISA AA24-016A)"
     },
     {
       "type": "relationship",
       "spec_version": "2.1",
-      "id": "relationship--997a7459-3ce4-44cb-8d7e-2393f8c05c10",
-      "created": "2026-06-27T11:49:03.762Z",
-      "modified": "2026-06-27T11:49:03.762Z",
+      "id": "relationship--9dae2c82-9247-4342-98d8-484e16baddad",
+      "created": "2026-06-28T13:08:06.270Z",
+      "modified": "2026-06-28T13:08:06.270Z",
       "relationship_type": "indicates",
-      "source_ref": "indicator--9b7e1d6f-2312-4851-b76c-066dcd0f5e2e",
-      "target_ref": "malware--9828e722-8189-42a8-b3cc-c45b6a4df125",
-      "description": "AndroxGh0st aktivite göstergesi"
+      "source_ref": "indicator--74c7e300-0d64-423a-9e51-38deb6893911",
+      "target_ref": "malware--810f9799-4caa-49ac-a408-941262a68b5e",
+      "description": "Indicator of AndroxGh0st activity"
     }
   ]
 }

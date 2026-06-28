@@ -1,17 +1,18 @@
-# Gerekli auditd Kuralı
+# Required auditd Rule
 
-Bu dosya, `pwnkit_cve_2021_4034.yml` Sigma kuralının veri kaynağını
-üretmek için **zorunlu ön koşulu** açıklıyor.
+This file describes the **mandatory prerequisite** for producing the
+data source the `pwnkit_cve_2021_4034.yml` Sigma rule depends on.
 
-`/etc/audit/rules.d/pwnkit.rules` içine eklenmeli:
+Add the following to `/etc/audit/rules.d/pwnkit.rules`:
 
 ```
 -w /usr/bin/pkexec -p x -k pkexec_exec
 ```
 
-Bu olmadan, `auditd` `pkexec` çalıştırmalarını hiç loglamaz ve Sigma
-kuralındaki `selection_auditd_primary` / `selection_auditd_env`
-koşulları hiçbir zaman tetiklenmez — yani kural "doğru" olsa da, veri
-kaynağı (auditd log) hiç üretilmediği için sessiz kalır.
+Without this rule, `auditd` never logs `pkexec` executions, and the
+`selection_auditd_primary` / `selection_auditd_env` conditions in the
+Sigma rule will never fire — meaning the rule itself can be perfectly
+correct while staying silent simply because its data source (the
+auditd log) was never produced.
 
-Detaylı kurulum adımları için: [`detection/README.md`](../README.md#kurulum-auditd-ile-pwnkit-tespiti)
+For detailed setup steps, see: [`detection/README.md`](../README.md#detection-setup-pwnkit-via-auditd)

@@ -1,17 +1,17 @@
 graph LR
     internet["Internet"]
-    target49["TARGET-49 (Apache 2.4.49)<br/>Risk: 60.5/100 (YÜKSEK)"]
+    target49["TARGET-49 (Apache 2.4.49)<br/>Risk: 60.5/100 (HIGH)"]
     shell["labuser shell (foothold)"]
-    root["root (TARGET-49)<br/>Risk: 48.5/100 (ORTA)"]
-    creddump["Credential Dump (varsayımsal)<br/>(VARSAYIMSAL)"]
-    lateral["Lateral Movement (varsayımsal)<br/>(VARSAYIMSAL)"]
-    database["Database (varsayımsal hedef)<br/>(VARSAYIMSAL)"]
+    root["root (TARGET-49)<br/>Risk: 48.5/100 (MEDIUM)"]
+    creddump["Credential Dump (hypothetical)<br/>(HYPOTHETICAL)"]
+    lateral["Lateral Movement (hypothetical)<br/>(HYPOTHETICAL)"]
+    database["Database (hypothetical target)<br/>(HYPOTHETICAL)"]
     internet -->|"VECTOR-I: Path Traversal + RCE CVE-2021-41773<br/>T1190"| target49
-    target49 -->|"CGI yönlendirme ile komut çalıştırma CVE-2021-42013<br/>T1059"| shell
+    target49 -->|"Command execution via CGI redirection CVE-2021-42013<br/>T1059"| shell
     shell -->|"VECTOR-II: PwnKit local privesc CVE-2021-4034<br/>T1548.001"| root
-    root -.->|"(varsayımsal) /etc/shadow veya bellek dump<br/>T1003"| creddump
-    creddump -.->|"(varsayımsal) çalınan kimlik bilgisiyle SSH<br/>T1021"| lateral
-    lateral -.->|"(varsayımsal) DB sunucusuna erişim<br/>T1213"| database
+    root -.->|"(hypothetical) /etc/shadow or memory dump<br/>T1003"| creddump
+    creddump -.->|"(hypothetical) SSH using a stolen credential<br/>T1021"| lateral
+    lateral -.->|"(hypothetical) access to the DB server<br/>T1213"| database
     style internet fill:#16213e,stroke:#0f3460,color:#fff
     style target49 fill:#16213e,stroke:#0f3460,color:#fff
     style shell fill:#7a1f2b,stroke:#e94560,color:#fff

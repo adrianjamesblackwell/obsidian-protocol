@@ -1,45 +1,47 @@
 # DETECTION COVERAGE HEATMAP
-### OBSIDIAN PROTOCOL / "Biz Gerçekten Neyi Görüyoruz?" Sorusunun Cevabı
+### OBSIDIAN PROTOCOL / Answering "What Can We Actually See?"
 
 ## Problem
 
-Bir kurum "MITRE ATT&CK kullanıyoruz" der, ama 14 taktik / 216 teknikten
-(MITRE Enterprise Matrix v18) kaçını **gerçekten tespit edebildiğini**
-söyleyemez. Bu kör nokta, savunma yatırımının nereye gitmesi gerektiği
-sorusunu cevapsız bırakır.
+An organization can say "we use MITRE ATT&CK," yet still be unable to
+say how many of the 14 tactics / 216 techniques (MITRE Enterprise
+Matrix v18) it can **actually detect**. That blind spot leaves the
+question of where defensive investment should go unanswered.
 
-## Üç Farklı Coverage Kavramı (Karıştırılmamalı)
+## Three Distinct Coverage Concepts (Not to Be Confused)
 
-| Kavram | Soru | Kaynak |
+| Concept | Question | Source |
 |---|---|---|
-| **Rule Coverage** | Bu teknik için bir Sigma/YARA kuralımız var mı? | `detection/sigma/*.yml` tags alanı |
-| **Validated Coverage** | Bu kural GERÇEKTEN bir saldırıyı yakaladı mı? | `purple-team/output/coverage_results.json` |
-| **Observed Coverage** | Bu teknik operasyonda hiç gözlendi mi? | `correlation-engine/output/correlated_incidents.json` |
+| **Rule Coverage** | Do we have a Sigma/YARA rule for this technique? | `detection/sigma/*.yml` tags field |
+| **Validated Coverage** | Did this rule ACTUALLY catch an attack? | `purple-team/output/coverage_results.json` |
+| **Observed Coverage** | Was this technique ever observed during the operation? | `correlation-engine/output/correlated_incidents.json` |
 
-Bu üçünü ayrı tutmak metodolojik olarak kritik: **"kuralımız var" ile
-"kural çalışıyor" farklı iddialardır.** Heatmap çıktısında bunu canlı
-gösteren bir örnek: Privilege Escalation taktiğinde Rule Coverage %100
-(Sigma kuralı var) ama Validated Coverage %0 çıkabilir (test
-koşusunda kural tetiklenmedi/zamanlama uyuşmadı) — bu bir hata değil,
-sistemin dürtüğü bir gerçek bulgudur.
+Keeping these three separate is methodologically critical: **"we have
+a rule" and "the rule works" are different claims.** A live example
+of this in the heatmap output: the Privilege Escalation tactic can
+show 100% Rule Coverage (a Sigma rule exists) while Validated Coverage
+sits at 0% (the rule didn't fire during the test run, or timing
+didn't line up) — that's not a bug, it's a genuine finding the system
+surfaces.
 
-## Kullanım
+## Usage
 
 ```bash
 python3 coverage-heatmap/heatmap.py
 ```
 
-Çıktı: terminal'de ASCII heatmap, `docs/coverage-heatmap.md`'de
-Markdown tablo, `coverage-heatmap/output/coverage_heatmap.json`'da
-ham veri.
+Output: an ASCII heatmap in the terminal, a Markdown table in
+`docs/coverage-heatmap.md`, and raw data in
+`coverage-heatmap/output/coverage_heatmap.json`.
 
-## Bilinen Sınırlama
+## Known Limitation
 
-`TECHNIQUE_TO_TACTIC` tablosu şu an bu projenin bildiği 7 tekniği
-kapsıyor — MITRE'nin tam 216 teknikli STIX veri setini indirip
-otomatik eşleme yapmıyor. Bu yüzden yüzdeler "MITRE'nin tamamı
-üzerinden" değil, "bu projenin etiketlediği teknik alt kümesi
-üzerinden" hesaplanıyor — rapor bunu açıkça belirtir, gizlemez.
-Gerçek bir üretim sisteminde bu tablo
+The `TECHNIQUE_TO_TACTIC` table currently covers the 7 techniques
+this project knows about — it does not download MITRE's full
+216-technique STIX dataset and auto-map against it. As a result,
+percentages are computed "over the technique subset this project has
+labeled," not "over the entirety of MITRE" — the report states this
+explicitly rather than hiding it. In a real production system, this
+table would be automatically derived from the official STIX bundle at
 [attack.mitre.org/resources/attack-data-and-tools](https://attack.mitre.org/resources/attack-data-and-tools/)
-adresindeki resmi STIX bundle'dan otomatik türetilir (Future Work).
+(Future Work).

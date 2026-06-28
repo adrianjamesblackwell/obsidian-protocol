@@ -1,40 +1,42 @@
 # INTEL EXPORT
-### OBSIDIAN PROTOCOL / STIX 2.1 + TAXII 2.1 Çıktıları
+### OBSIDIAN PROTOCOL / STIX 2.1 + TAXII 2.1 Output
 
-Bu modül, operasyonun ürettiği IOC'leri ve CTI bağlamını **gerçek STIX
-2.1 spesifikasyonuna** uyumlu bir bundle olarak dışa aktarır ve bunu
-**minimal bir TAXII 2.1 sunucusu** üzerinden servis eder.
+This module exports the IOCs and CTI context produced by the
+operation as a bundle conforming to the **real STIX 2.1
+specification**, and serves it through a **minimal TAXII 2.1
+server**.
 
-## Neden Kütüphanesiz (Ham JSON)
+## Why No Library (Raw JSON)
 
-`stix2` Python kütüphanesi yaygın bir araçtır, ama bu modül kasıtlı
-olarak ham JSON üretimi kullanıyor — hem ek bağımlılık gerektirmeden
-çalışsın hem de "STIX formatının altında ne var" sorusunu doğrudan
-gösterilebilir kılsın. Üretilen JSON, OASIS STIX 2.1 spesifikasyonuna
-(nesne tipleri, zorunlu alanlar, ID formatı `tip--uuid`) tam uyumludur
-ve gerçek bir STIX ayrıştırıcısına (örn. `stix2.parse()`) verilebilir.
+The `stix2` Python library is a common tool, but this module
+deliberately produces raw JSON instead — so it works without an
+extra dependency, and so "what's actually underneath the STIX format"
+stays directly visible. The JSON produced is fully compliant with the
+OASIS STIX 2.1 specification (object types, required fields, ID
+format `type--uuid`) and can be handed to a real STIX parser (e.g.
+`stix2.parse()`).
 
-## Üretilen STIX Nesneleri
+## STIX Objects Produced
 
-| Tip | Sayı | İçerik |
+| Type | Count | Content |
 |---|---|---|
 | `vulnerability` | 3 | CVE-2021-41773, CVE-2021-42013, CVE-2021-4034 |
 | `attack-pattern` | 3 | T1190, T1059, T1548.001 |
-| `indicator` | 3 | Path traversal pattern, PwnKit pkexec pattern, AndroxGh0st .env tarama pattern |
-| `malware` | 1 | AndroxGh0st (gerçek, isimli botnet — bkz. docs/threat-intelligence.md) |
-| `relationship` | 8 | Yukarıdakileri birbirine bağlayan SRO'lar (`indicates`, `exploits`, `uses`) |
+| `indicator` | 3 | Path traversal pattern, PwnKit pkexec pattern, AndroxGh0st .env scanning pattern |
+| `malware` | 1 | AndroxGh0st (a real, named botnet — see docs/threat-intelligence.md) |
+| `relationship` | 8 | SROs linking the objects above together (`indicates`, `exploits`, `uses`) |
 
-## Kullanım
+## Usage
 
-### STIX Bundle Üretimi
+### Generating the STIX Bundle
 
 ```bash
 python3 intel-export/stix_export.py
 ```
 
-Çıktı: `intel-export/output/obsidian_protocol_bundle.stix2.json`
+Output: `intel-export/output/obsidian_protocol_bundle.stix2.json`
 
-### TAXII Sunucusunu Başlatma
+### Starting the TAXII Server
 
 ```bash
 python3 intel-export/taxii_server.py
@@ -44,14 +46,14 @@ python3 intel-export/taxii_server.py
 # Discovery
 curl http://localhost:8888/taxii2/
 
-# Koleksiyonlar
+# Collections
 curl http://localhost:8888/taxii2/api/collections/
 
-# STIX nesneleri
+# STIX objects
 curl http://localhost:8888/taxii2/api/collections/obsidian-protocol-collection-001/objects/
 ```
 
-### Gerçek Bir STIX İstemcisiyle Tüketim (Örnek)
+### Consuming It With a Real STIX Client (Example)
 
 ```python
 from stix2 import TAXIICollectionSource, Filter
@@ -62,15 +64,15 @@ source = TAXIICollectionSource(collection)
 vulns = source.query([Filter("type", "=", "vulnerability")])
 ```
 
-> Not: yukarıdaki örnek `stix2` ve `taxii2-client` kütüphanelerini
-> gerektirir (`pip install stix2 taxii2-client`); bu repo'nun kendisi
-> bu kütüphanelere bağımlı değildir.
+> Note: the example above requires the `stix2` and `taxii2-client`
+> libraries (`pip install stix2 taxii2-client`); this repository
+> itself does not depend on them.
 
-## Bilinen Sınırlama
+## Known Limitation
 
-`taxii_server.py`, TAXII 2.1'in salt-okunur (read-only) "Get Objects"
-akışını uygular. Yazma (POST /objects/), filtreleme query
-parametreleri (`added_after`, `match[type]` vb.) ve authentication
-desteklenmiyor — bunlar production TAXII sunucularının (örn. OpenCTI,
-EclecticIQ) kapsadığı ama bu referans implementasyonun kapsamadığı
-özellikler.
+`taxii_server.py` implements only TAXII 2.1's read-only "Get Objects"
+flow. Writing (POST /objects/), filtering query parameters
+(`added_after`, `match[type]`, etc.), and authentication are not
+supported — these are features production TAXII servers (e.g.
+OpenCTI, EclecticIQ) cover that this reference implementation does
+not.

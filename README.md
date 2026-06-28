@@ -1,11 +1,49 @@
 # OBSIDIAN PROTOCOL
 ### Evidence-Driven Security Reasoning Platform
 
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-Educational%2FPortfolio-blue)
+![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-mapped-d6293e)
+![STIX](https://img.shields.io/badge/STIX-2.1-orange)
+![TAXII](https://img.shields.io/badge/TAXII-2.1-orange)
+![Sigma](https://img.shields.io/badge/Sigma-rules-6cc644)
+![YARA](https://img.shields.io/badge/YARA-rules-6cc644)
+![Modules](https://img.shields.io/badge/Modules-17%20%2B%20Blackwell%20Core-e94560)
+![Status](https://img.shields.io/badge/Status-Lab%20Verified-success)
+
 > **Classification:** Educational / Portfolio. All operations were
 > conducted in an isolated lab environment with no internet access. No
 > third-party or live systems were accessed in any way. All
 > intelligence sources used (NVD, CISA KEV, CISA/FBI advisories, MITRE
 > ATT&CK, OASIS STIX/TAXII) are entirely public standards.
+
+---
+
+## Dashboard Preview
+
+The platform ships its own self-contained, interactive HTML dashboard
+(`reports/obsidian_protocol_report.html`) — no server, no external
+dependency, just one file. The **Overview** tab below renders live
+from the actual pipeline run shown throughout this README:
+
+<p align="center">
+  <img src="docs/assets/dashboard_overview.png" alt="OBSIDIAN PROTOCOL — interactive HTML dashboard, Overview tab" width="850">
+</p>
+
+The dashboard has seven tabs (Overview, Findings, Detection, Risk &
+Intel, Engineering, Root Cause, Artifacts) and includes a fully
+interactive, draggable, zoomable render of the actual Blackwell
+Evidence Graph — every chart is wired to the same underlying JSON, not
+a static image. See [`examples/sample_report.html`](examples/sample_report.html)
+to open the full dashboard yourself without running anything.
+
+The same pipeline also produces a print-ready, multi-page PDF
+operation report (`reports/obsidian_protocol_report.pdf`):
+
+<p align="center">
+  <img src="docs/assets/pdf_report_cover.png" alt="OBSIDIAN PROTOCOL — PDF report cover page" width="410">
+  <img src="docs/assets/pdf_report_risk.png" alt="OBSIDIAN PROTOCOL — PDF report, Risk Scoring section" width="410">
+</p>
 
 ---
 
@@ -311,8 +349,27 @@ and known limitations:
 - [`detection/README.md`](detection/README.md) — auditd setup, MITRE mapping, patch table
 - [`intel-export/README.md`](intel-export/README.md) — STIX object types, TAXII endpoints
 - [`reporting/README.md`](reporting/README.md) — report chain, dependency order
+- [`scripts/README.md`](scripts/README.md) — where your own exploit code goes
+- [`docs/walkthrough.md`](docs/walkthrough.md) — the full guided operation log (recon to root)
+- [`docs/threat-intelligence.md`](docs/threat-intelligence.md) — real campaign data (AndroxGh0st, PwnKit's 13-year timeline)
+- [`docs/analysis.md`](docs/analysis.md) — operator assessment template (CVSS vs. real-world experience)
 - [`docs/research-findings.md`](docs/research-findings.md) — metrics, limitations, future work, lessons learned
 - [`blackwell-core/README.md`](blackwell-core/README.md) — the reasoning layer's full architecture
+
+## Report Generation
+
+| Command | Produces |
+|---|---|
+| `python3 reporting/generate_html_report.py` | Self-contained, interactive HTML dashboard with a live-rendered Evidence Graph |
+| `python3 reporting/generate_pdf_report.py` | Print-ready, multi-page PDF report (cover page, table of contents, 14 sections including the full Blackwell Core breakdown) |
+| `python3 reporting/executive/executive_report.py` | One-page, CEO-level executive summary (Markdown + JSON) |
+| `python3 reporting/navigator/generate_navigator_layer.py` | ATT&CK Navigator layer + Markdown coverage matrix |
+| `python3 reporting/generate_all_reports.py` | Runs the entire 23-step pipeline (every module above, in dependency order) end to end |
+
+All four report formats are generated from the exact same
+`reporting/collect_report_data.py` context object, so the PDF, the
+HTML dashboard, and the executive summary can never silently disagree
+with each other.
 
 ## Disclaimer
 

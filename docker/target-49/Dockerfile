@@ -3,15 +3,16 @@
 # VECTOR-I: CVE-2021-41773 / CVE-2021-42013 (Apache Path Traversal/RCE)
 # VECTOR-II: CVE-2021-4034 (PwnKit Local Privilege Escalation)
 #
-# UYARI: Bu imaj BİLEREK zafiyetli bir Apache sürümü içerir.
-# Sadece izole, internete açık olmayan bir Docker range'inde çalıştırın.
-# Eğitim ve portföy amaçlıdır. Üretimde KULLANMAYIN.
+# WARNING: This image DELIBERATELY contains a vulnerable Apache
+# version. Only run it inside an isolated Docker range with no
+# internet exposure. For educational and portfolio purposes only.
+# Do NOT use in production.
 # ============================================================
 
 FROM debian:bullseye-slim
 
-# Build bağımlılıkları (Apache'yi kaynaktan derleyeceğiz çünkü
-# Debian repo'ları zaten patch'li sürüm dağıtıyor)
+# Build dependencies (Apache is compiled from source because
+# Debian's repositories already ship a patched version)
 RUN apt-get update && apt-get install -y \
     build-essential \
     wget \
@@ -25,7 +26,7 @@ RUN apt-get update && apt-get install -y \
     cgi-bin \
     && rm -rf /var/lib/apt/lists/*
 
-# === Zafiyetli sürüm: tam olarak 2.4.49 ===
+# === Vulnerable version: exactly 2.4.49 ===
 WORKDIR /usr/src
 RUN wget https://archive.apache.org/dist/httpd/httpd-2.4.49.tar.gz \
     && tar -xzf httpd-2.4.49.tar.gz
@@ -39,30 +40,30 @@ RUN ./configure \
     && make -j$(nproc) \
     && make install
 
-# CGI script çalıştırılabilir hale getir (VECTOR-I'in RCE
-# tarafı mod_cgi'nin aktif olmasını gerektirir)
+# Make the CGI script directory executable (the RCE side of
+# VECTOR-I requires mod_cgi to be active)
 RUN mkdir -p /usr/local/apache2/cgi-bin
 
-# --- Düşük yetkili sistem kullanıcısı (priv-esc senaryosu için) ---
+# --- Low-privilege system user (for the priv-esc scenario) ---
 RUN useradd -m -s /bin/bash labuser && \
     echo "labuser:LabPass123!" | chpasswd
 
-# === VECTOR-II (CVE-2021-4034 / PwnKit) zafiyeti kuruluyor ===
+# === Installing the VECTOR-II (CVE-2021-4034 / PwnKit) vulnerability ===
 COPY setup-pwnkit.sh /tmp/setup-pwnkit.sh
 RUN chmod +x /tmp/setup-pwnkit.sh && /tmp/setup-pwnkit.sh
 
-# Apache'yi bu kullanıcı altında çalıştır (gerçekçi senaryo:
-# web server genelde root değil, sınırlı bir kullanıcı olarak çalışır)
+# Run Apache under this user (realistic scenario: a web server
+# typically runs as a restricted user, not as root)
 RUN sed -i 's/^User .*/User labuser/' /usr/local/apache2/conf/httpd.conf && \
     sed -i 's/^Group .*/Group labuser/' /usr/local/apache2/conf/httpd.conf
 
-# mod_cgi'yi aktif et + CGI dizinine izin ver (VECTOR-I'in RCE koşulu)
+# Enable mod_cgi + allow the CGI directory (the RCE precondition for VECTOR-I)
 COPY httpd-vuln.conf /usr/local/apache2/conf/extra/httpd-vuln.conf
 RUN echo "Include conf/extra/httpd-vuln.conf" >> /usr/local/apache2/conf/httpd.conf
 
-# Sahte "iç ağ" dosyası — path traversal ile okunabilir olacak
-# (gerçek bir pentest'te burada /etc/passwd, config dosyaları,
-# SSH key'leri vs. olur — biz lab içinde sahte bir secret koyuyoruz)
+# Fake "internal network" file — readable via path traversal
+# (in a real pentest this would be /etc/passwd, config files,
+# SSH keys, etc. — here we plant a fake secret inside the lab)
 RUN mkdir -p /opt/internal && \
     echo "INTERNAL_DB_PASSWORD=S3cr3t_DB_Pass_2024" > /opt/internal/secrets.env && \
     chown labuser:labuser /opt/internal/secrets.env

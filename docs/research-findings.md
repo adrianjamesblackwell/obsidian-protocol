@@ -1,221 +1,231 @@
 # RESEARCH FINDINGS
-### OBSIDIAN PROTOCOL / Ölçümler, Sınırlamalar, Bulgular
+### OBSIDIAN PROTOCOL / Metrics, Limitations, Findings
 
-> Bu doküman, projeyi "çalışıyor" seviyesinden "ne öğrendim, ne ölçtüm,
-> nerede durduğunu biliyorum" seviyesine taşımak için var. Akademik bir
-> rapor formatında: ölçülebilir metrikler, bilinçli kapsam dışı
-> bırakılan noktalar, performans karşılaştırması, ve çıkarılan dersler.
-
----
-
-## 1. Ölçülebilir Metrikler
-
-Aşağıdaki sayılar, sistemin kendi örnek veri setinden (`telemetry/sample-data/`,
-`purple-team/attack_log_template.json`) üretilen **gerçek çıktılardan**
-alınmıştır — hiçbiri tahmini veya hedef değer değildir.
-
-| Metrik | Değer | Kaynak |
-|---|---|---|
-| Toplam Python kod satırı | 4.705 | `find . -name "*.py" \| xargs wc -l` |
-| Toplam modül sayısı | 17 | üst seviye dizin sayısı |
-| Sigma kuralı sayısı | 2 (VECTOR-I, VECTOR-II) | `detection/sigma/` |
-| YARA kuralı sayısı | 2 | `detection/yara/pwnkit_artifacts.yar` |
-| STIX 2.1 nesnesi | 18 (3 vulnerability, 3 attack-pattern, 3 indicator, 1 malware, 8 relationship) | `intel-export/stix_export.py` çıktısı |
-| Telemetri olayı (örnek koşu) | 6 (3 kaynaktan: auditd, Apache log, eBPF) | `telemetry/output/unified_timeline.ndjson` |
-| Correlation Engine alarm azaltma (örnek koşu) | %50 (6 ham olay → 3 incident) | `correlation-engine/correlate.py` çıktısı |
-| Detection Coverage (örnek koşu) | %75 (3/4 saldırı adımı) | `purple-team/output/coverage_results.json` |
-| Coverage Heatmap (bilinen teknik kümesi üzerinden) | %43 (3/7 teknik doğrulanmış) | `coverage-heatmap/heatmap.py` çıktısı |
-| Ortalama tespit gecikmesi (örnek koşu) | 0.0–5.0s aralığında (koşuya göre değişken) | `purple-team/validate.py` çıktısı |
-| Risk skoru aralığı (örnek koşu) | 48.5–60.5 / 100 | `risk-engine/output/risk_scores.json` |
-| Emulation Score - Attack Diversity (örnek koşu) | %42.9 (3 benzersiz teknik) | `emulation-score/emulation_score.py` çıktısı |
-| Emulation Score - MITRE Matrix Coverage | %1.39 (216 tekniğin tamamı üzerinden) | aynı, not: düşük olması beklenen/normal |
-| Rule Quality - analiz edilen kural sayısı | 2 (her ikisi de "iyi durumda" notu aldı) | `rule-quality/analyze_rules.py` çıktısı |
-| IOC Decay - takip edilen IOC sayısı | 3 (2 ACTIVE, 1 AGING) | `ioc-decay/ioc_decay.py` çıktısı |
-| Telemetry Gap - kör taktik sayısı | 6/11 (Collection, C2, Credential Access, Discovery, Exfiltration, Lateral Movement) | `telemetry-gap/gap_analysis.py` çıktısı |
-
-### Bu Sayıların Ne Olduğu, Ne Olmadığı
-
-**Önemli metodolojik not:** Yukarıdaki Coverage/Latency/Risk sayıları,
-küçük bir **örnek/demo veri setinden** (4 saldırı adımı, 3 telemetri
-kaynağı) üretilmiştir — bu, production-scale bir SOC ortamının
-istatistiksel temsilcisi değildir. Sistemin amacı "şu an %50 coverage
-sağlıyorum" iddiası değil, **coverage'ı ölçen ve doğru hesaplayan bir
-metodoloji inşa etmek**. Gerçek bir operasyonda (`docs/walkthrough.md`
-tam olarak yürütüldüğünde) bu sayılar değişecektir; önemli olan
-ölçüm altyapısının doğru çalışması.
-
-### False Positive Oranı — Neden Ölçülemiyor (Şimdilik)
-
-Bilinçli bir şeffaflık notu: bu projede **false positive oranı
-hesaplanmamıştır**, çünkü bunun istatistiksel olarak anlamlı bir
-ölçümü, zararsız/normal trafik üreten bir "background noise" jeneratörü
-gerektirir (örn. cron job'lar, meşru kullanıcı trafiği, sistem
-bakım komutları gibi gerçek dünya gürültüsü). Bu proje sadece saldırı
-senaryosunu simüle ediyor; FP oranı ölçmek için ayrı bir "benign traffic
-generator" modülü gerekir (bkz. Bölüm 3, Future Work #4).
+> This document exists to move the project beyond "it works" and
+> into "here's what I learned, what I measured, and where I know it
+> stands." Written in an academic-report format: measurable metrics,
+> deliberately out-of-scope points, a performance comparison, and
+> lessons learned.
 
 ---
 
-## 2. Limitations (Bilinçli Kapsam Dışı Bırakılan Noktalar)
+## 1. Measurable Metrics
 
-Bu bölüm, "ne yapılmadığını bilmemek" ile "ne yapılmadığına bilinçli
-karar vermek" arasındaki farkı göstermek için var.
+The numbers below are **real outputs** produced from the system's own
+sample dataset (`telemetry/sample-data/`,
+`purple-team/attack_log_template.json`) — none of them are estimates
+or target values.
 
-| # | Sınırlama | Neden Bilinçli |
+| Metric | Value | Source |
 |---|---|---|
-| 1 | Purple Team eşleştirme algoritması sadece VECTOR+CVE etiketi üzerinden çalışıyor, network/process/parent-child ilişkisi bazlı korelasyon yapmıyor | Production SIEM korelasyon motoru kapsamı dışında; amaç metodolojiyi göstermek, production-grade bir korelasyon motoru inşa etmek değil |
-| 2 | Risk Engine ağırlıkları (0.25/0.30/0.20/0.25) sabit ve elle belirlenmiş, EPSS gibi olasılıksal/ML tabanlı değil | Şeffaflık önceliklendirildi - her bileşenin skora etkisi ayrı ayrı görünür, kara kutu model değil |
-| 3 | TAXII sunucusu sadece okuma (GET /objects/) destekliyor, yazma/filtreleme/authentication yok | Referans implementasyon amaçlı; OpenCTI/EclecticIQ gibi production TAXII sunucularının kapsamı çok daha geniş |
-| 4 | eBPF collector (`pwnkit_ebpf_trace.bt`) gerçek zaman damgası için sistem boot zamanına ihtiyaç duyuyor, şu an placeholder kullanıyor | Container içinde `/proc/uptime` enjeksiyonu ek bir kurulum adımı gerektiriyor, kapsamın dışına bilinçli olarak bırakıldı |
-| 5 | Sadece 2 CVE / 2 saldırı vektörü kapsanıyor | Derinlik genişlikten önceliklendirildi - 2 CVE'yi tam yaşam döngüsüyle (recon->rapor) işlemek, 10 CVE'yi yüzeysel kapsamaktan daha değerli görüldü |
-| 6 | Recon adımlarının (örn. salt bir GET /) kendi detection imzası yok, bu "kaçırıldı" olarak işaretleniyor | Bu bir hata değil, gerçek bir gözlemlenebilirlik sınırı - gerçek SOC'larda da recon trafiği genelde gürültüden ayrıştırılamaz (bkz. Bölüm 5) |
-| 7 | Risk Engine ve Purple Team arasındaki zaman penceresi (varsayılan 120s) sabit, adaptif değil | Basit ve açıklanabilir tutmak için; gerçek bir sistemde bu pencere CVE tipine göre (örn. local priv-esc vs network-based) değişmeli |
-| 8 | Tek hedef sistemi (TARGET-49) var, lateral movement / multi-host senaryo yok | Kapsam, tek bir gerçekçi zincire (dış->iç->root) odaklandı; çok-host senaryo Future Work'te |
-| 9 | Correlation Engine'in `KNOWN_CHAIN_PATTERNS`'ı sadece bu projenin VECTOR-I/II zincirini biliyor, gerçek APT grup TTP veri setlerinden türetilmiş değil | Production'da MITRE'nin resmi campaign/group STIX verisinden otomatik türetilebilir (Future Work #8) |
-| 10 | Emulation Score, sadece 3 incident/3 benzersiz teknik üzerinden hesaplanıyor - istatistiksel olarak küçük örneklem | Bu projenin kapsamı (2 CVE) ile doğru orantılı; skorun kendisi şeffaf olarak "küçük örneklem" notunu taşıyor |
-| 11 | Root Cause Discovery'nin nedensel zincirleri (`causal_chain`) elle/uzmanlık bilgisiyle yazıldı, otomatik log analizinden çıkarılmadı | Gerçek bir "otomatik root cause" sistemi, log korelasyonundan nedensellik çıkarımı yapan ayrı bir araştırma alanıdır; bu modül "format ve sunumu" gösteriyor |
+| Total Python lines of code | 4,705 | `find . -name "*.py" \| xargs wc -l` |
+| Total module count | 17 | top-level directory count |
+| Sigma rule count | 2 (VECTOR-I, VECTOR-II) | `detection/sigma/` |
+| YARA rule count | 2 | `detection/yara/pwnkit_artifacts.yar` |
+| STIX 2.1 objects | 18 (3 vulnerability, 3 attack-pattern, 3 indicator, 1 malware, 8 relationship) | `intel-export/stix_export.py` output |
+| Telemetry events (sample run) | 6 (from 3 sources: auditd, Apache log, eBPF) | `telemetry/output/unified_timeline.ndjson` |
+| Correlation Engine alert reduction (sample run) | 50% (6 raw events → 3 incidents) | `correlation-engine/correlate.py` output |
+| Detection Coverage (sample run) | 75% (3/4 attack steps) | `purple-team/output/coverage_results.json` |
+| Coverage Heatmap (over the known technique subset) | 43% (3/7 techniques validated) | `coverage-heatmap/heatmap.py` output |
+| Average detection latency (sample run) | 0.0–5.0s range (varies by run) | `purple-team/validate.py` output |
+| Risk score range (sample run) | 48.5–60.5 / 100 | `risk-engine/output/risk_scores.json` |
+| Emulation Score - Attack Diversity (sample run) | 42.9% (3 unique techniques) | `emulation-score/emulation_score.py` output |
+| Emulation Score - MITRE Matrix Coverage | 1.39% (over all 216 techniques) | same source; note: expected/normal to be low |
+| Rule Quality - rules analyzed | 2 (both graded "good condition") | `rule-quality/analyze_rules.py` output |
+| IOC Decay - IOCs tracked | 3 (2 ACTIVE, 1 AGING) | `ioc-decay/ioc_decay.py` output |
+| Telemetry Gap - blind tactic count | 6/11 (Collection, C2, Credential Access, Discovery, Exfiltration, Lateral Movement) | `telemetry-gap/gap_analysis.py` output |
+
+### What These Numbers Are, and What They Aren't
+
+**Important methodological note:** the Coverage/Latency/Risk numbers
+above were produced from a small **sample/demo dataset** (4 attack
+steps, 3 telemetry sources) — this is not a statistically
+representative sample of a production-scale SOC environment. The
+system's purpose isn't the claim "I currently provide 50% coverage,"
+it's **building a methodology that measures and computes coverage
+correctly**. In a real operation (with `docs/walkthrough.md` fully
+executed), these numbers will change; what matters is that the
+measurement infrastructure works correctly.
+
+### False Positive Rate — Why It Can't Be Measured (Yet)
+
+A deliberate transparency note: this project does **not** compute a
+false positive rate, because a statistically meaningful measurement
+of that requires a "background noise" generator producing benign/
+normal traffic (e.g. real-world noise such as cron jobs, legitimate
+user traffic, system maintenance commands). This project only
+simulates the attack scenario; measuring FP rate would require a
+separate "benign traffic generator" module (see Section 3, Future
+Work #4).
+
+---
+
+## 2. Limitations (Deliberately Out-of-Scope Points)
+
+This section exists to demonstrate the difference between "not
+knowing what wasn't done" and "consciously deciding what not to do."
+
+| # | Limitation | Why It's Deliberate |
+|---|---|---|
+| 1 | The Purple Team matching algorithm works only off the VECTOR+CVE tag, with no network/process/parent-child relationship correlation | A production SIEM correlation engine is out of scope; the goal is to demonstrate the methodology, not build a production-grade correlation engine |
+| 2 | Risk Engine weights (0.25/0.30/0.20/0.25) are fixed and hand-set, not probabilistic/ML-based like EPSS | Transparency was prioritized — each component's contribution to the score is individually visible, not a black-box model |
+| 3 | The TAXII server supports read only (GET /objects/), with no write/filtering/authentication | Intended as a reference implementation; production TAXII servers like OpenCTI/EclecticIQ have a much broader scope |
+| 4 | The eBPF collector (`pwnkit_ebpf_trace.bt`) needs system boot time for a real timestamp, and currently uses a placeholder | Injecting `/proc/uptime` inside the container requires an extra setup step, deliberately left out of scope |
+| 5 | Only 2 CVEs / 2 attack vectors are covered | Depth was prioritized over breadth — fully processing 2 CVEs through their entire lifecycle (recon->report) was judged more valuable than superficially covering 10 |
+| 6 | Recon steps (e.g. a bare GET /) have no detection signature of their own and are flagged as "missed" | This is not a bug, it's a genuine observability limit — in real SOCs too, recon traffic generally can't be separated from noise (see Section 5) |
+| 7 | The time window between the Risk Engine and Purple Team (default 120s) is fixed, not adaptive | Kept simple and explainable on purpose; in a real system this window should vary by CVE type (e.g. local priv-esc vs. network-based) |
+| 8 | There is a single target system (TARGET-49), with no lateral movement / multi-host scenario | Scope was focused on one realistic chain (external->internal->root); a multi-host scenario is in Future Work |
+| 9 | The Correlation Engine's `KNOWN_CHAIN_PATTERNS` only knows this project's own VECTOR-I/II chain, and isn't derived from real APT group TTP datasets | In production this could be auto-derived from MITRE's official campaign/group STIX data (Future Work #8) |
+| 10 | The Emulation Score is computed from only 3 incidents / 3 unique techniques — a statistically small sample | This is proportional to this project's scope (2 CVEs); the score itself transparently carries a "small sample" note |
+| 11 | Root Cause Discovery's causal chains (`causal_chain`) were written manually/from expert knowledge, not derived from automated log analysis | A real "automated root cause" system is its own separate research area (causal inference from log correlation); this module demonstrates the "format and presentation" |
 
 ---
 
 ## 3. Future Work
 
-Önceliklendirilmiş, gerçekçi bir sıradaki adımlar listesi:
+A prioritized, realistic list of next steps:
 
-1. **Adaptif risk ağırlıklandırma** - sabit ağırlıklar (Bölüm 2, #2)
-   yerine, geçmiş coverage sonuçlarına göre kendini ayarlayan basit bir
-   geri besleme mekanizması (örn. sürekli kaçırılan CVE'lerin
-   `defense_gap` ağırlığını otomatik artırması).
-2. **Çok-host / lateral movement senaryosu** - TARGET-49'a ek olarak
-   ikinci bir iç ağ host'u ekleyip, PwnKit sonrası lateral movement
-   adımını (örn. SSH key reuse, internal service discovery) zincire
-   katmak.
-3. **Gerçek zamanlı eBPF dashboard** - şu an batch/offline çalışan
-   eBPF parser'ı, canlı bir terminal dashboard'a (örn. `rich` veya
-   `textual` kütüphanesiyle) bağlamak.
-4. **Benign traffic generator** - false positive oranını ölçülebilir
-   kılmak için, meşru/zararsız trafik üreten bir arka plan jeneratörü
-   (Bölüm 1'deki FP ölçüm boşluğunu kapatmak için).
-5. **STIX Sighting nesneleri** - şu an sadece Indicator/Vulnerability/
-   Malware üretiliyor; her gerçek detection olayını bir STIX `sighting`
-   nesnesine çevirmek, "bu indicator kaç kez gözlemlendi" sorusunu
-   STIX formatında cevaplanabilir kılar.
-6. **CALDERA/Atomic Red Team entegrasyonu** - manuel exploit script'leri
-   yerine, MITRE CALDERA ile otomatik, tekrarlanabilir saldırı
-   emülasyonu (özellikle çoklu-koşu istatistiksel coverage ölçümü için
-   değerli olurdu).
-7. **Üçüncü bir vektör (VECTOR-III)** - farklı bir zafiyet sınıfı
-   (örn. deserialization veya SSRF) ekleyip Risk Engine'in farklı CVE
-   profillerinde nasıl davrandığını gözlemlemek.
-8. **MITRE Group/Campaign veri setinden otomatik kill-chain çıkarımı** -
-   Correlation Engine'in `KNOWN_CHAIN_PATTERNS`'ını elle tanımlamak
-   yerine, MITRE'nin resmi STIX campaign/intrusion-set veri setinden
-   (gerçek APT gruplarının bilinen TTP sıraları) otomatik türetmek.
+1. **Adaptive risk weighting** — instead of the fixed weights
+   (Section 2, #2), a simple feedback mechanism that self-adjusts
+   based on historical coverage results (e.g. automatically
+   increasing the `defense_gap` weight for CVEs that keep getting
+   missed).
+2. **Multi-host / lateral movement scenario** — adding a second
+   internal-network host alongside TARGET-49, and chaining a
+   post-PwnKit lateral movement step (e.g. SSH key reuse, internal
+   service discovery) onto the attack.
+3. **Real-time eBPF dashboard** — connecting the eBPF parser, which
+   currently runs in batch/offline mode, to a live terminal dashboard
+   (e.g. using the `rich` or `textual` library).
+4. **Benign traffic generator** — a background generator producing
+   legitimate/harmless traffic, to make the false-positive rate
+   measurable (closing the FP measurement gap from Section 1).
+5. **STIX Sighting objects** — currently only Indicator/Vulnerability/
+   Malware objects are produced; converting each real detection event
+   into a STIX `sighting` object would make "how many times was this
+   indicator observed" answerable in STIX format.
+6. **CALDERA/Atomic Red Team integration** — automated, repeatable
+   attack emulation via MITRE CALDERA instead of manual exploit
+   scripts (especially valuable for multi-run statistical coverage
+   measurement).
+7. **A third vector (VECTOR-III)** — adding a different vulnerability
+   class (e.g. deserialization or SSRF) and observing how the Risk
+   Engine behaves across different CVE profiles.
+8. **Automated kill-chain derivation from MITRE Group/Campaign data**
+   — deriving the Correlation Engine's `KNOWN_CHAIN_PATTERNS`
+   automatically from MITRE's official STIX campaign/intrusion-set
+   dataset (known TTP sequences of real APT groups), instead of
+   hand-defining them.
 
 ---
 
-## 4. Performans Karşılaştırması: auditd vs eBPF
+## 4. Performance Comparison: auditd vs. eBPF
 
-Bu proje ikisini de (hybrid) kullandığı için, ikisinin maliyet/fayda
-dengesini literatürden gerçek, atıflı verilerle karşılaştırmak
-anlamlı:
+Since this project uses both (hybrid), it's worth comparing their
+cost/benefit tradeoff against real, cited figures from the
+literature:
 
-| Boyut | auditd | eBPF |
+| Dimension | auditd | eBPF |
 |---|---|---|
-| CPU overhead | Geleneksel userspace audit ajanları için tipik olarak %5-15 aralığında raporlanıyor | Tipik olarak %1'in altında; container/VM ortamlarındaki ölçümlerde %2'nin altında kalıyor |
-| Yüksek olay hacminde davranış | Saniyede on binlerce syscall'da audit buffer taşması veya senkron disk yazma yükü nedeniyle performans düşüşü riski var | Olaylar kernel içinde filtrelenip aggregate edildiği için yüksek hacimde daha dayanıklı |
-| Görünürlük seviyesi | Userspace audit subsystem'i üzerinden, bazı syscall'larda gecikmeli/eksik olabilir | Doğrudan kernel tracepoint/kprobe seviyesinde, syscall anında |
-| Kurulum karmaşıklığı | Çoğu dağıtımda hazır kurulu, audit.rules ile basit yapılandırma | bpftrace/BCC gibi ek araç + CAP_BPF/CAP_SYS_ADMIN capability gerektirir |
-| PwnKit (VECTOR-II) özel durumu | pkexec'in audit/logging kodunun önüne geçmesi nedeniyle bazı varyantlarda hiçbir şey yakalamayabilir (bkz. detection/README.md) | Syscall'ı doğrudan kernel'den gördüğü için bu boşluğu kapatabilir |
+| CPU overhead | Typically reported in the 5-15% range for conventional userspace audit agents | Typically under 1%; measurements in container/VM environments stay below 2% |
+| Behavior at high event volume | At tens of thousands of syscalls per second, there's a risk of performance degradation from audit buffer overflow or synchronous disk-write load | Because events are filtered and aggregated inside the kernel, it holds up better under high volume |
+| Visibility level | Via the userspace audit subsystem; can be delayed/incomplete for some syscalls | Directly at the kernel tracepoint/kprobe level, at the moment of the syscall |
+| Setup complexity | Pre-installed on most distributions, simple configuration via audit.rules | Requires additional tooling (bpftrace/BCC) plus CAP_BPF/CAP_SYS_ADMIN capabilities |
+| The PwnKit (VECTOR-II) special case | May catch nothing at all in some variants, because the exploit runs ahead of pkexec's audit/logging code (see detection/README.md) | Can close this gap because it sees the syscall directly from the kernel |
 
-**Kaynaklar:** CPU overhead rakamları genel literatür gözlemlerine
-dayanıyor (eBPF performans analizi yazıları, 2025-2026; eBPF-PATROL
-akademik değerlendirmesi, container/VM ortamlarında %2 altı CPU
-overhead raporu); auditd'nin yüksek hacimli senaryolardaki buffer
-taşması davranışı, GPU cluster güvenlik izleme bağlamında belgelenmiş
-bir gözlem (Backend.AI eBPF güvenlik denetimi yazısı, 2026). Bu
-rakamlar OBSIDIAN PROTOCOL'ün kendi ortamında ayrıca benchmark
-edilmemiştir - bu, Future Work listesine eklenmiş bir sonraki adımdır.
+**Sources:** the CPU overhead figures are based on general literature
+observations (eBPF performance analysis writeups, 2025-2026; the
+eBPF-PATROL academic evaluation, reporting sub-2% CPU overhead in
+container/VM environments); auditd's buffer-overflow behavior under
+high-volume scenarios is a documented observation from a GPU cluster
+security-monitoring context (a Backend.AI eBPF security audit
+writeup, 2026). These figures have not been separately benchmarked in
+OBSIDIAN PROTOCOL's own environment — that is a next step that has
+been added to the Future Work list.
 
-**Bu projedeki pratik sonuç:** Hybrid yaklaşımın gerekçesi tam olarak
-bu tablodaki son satır - auditd'nin "görmediği" bir saldırı sınıfı
-(PwnKit'in audit-bypass karakteri) var, ve eBPF bunu kapatıyor. Bu,
-"neden iki katman" sorusunun deneysel değil, **mimari** bir cevabı.
+**The practical conclusion in this project:** the rationale for the
+hybrid approach is exactly the last row of this table — there's a
+class of attack auditd "can't see" (PwnKit's audit-bypassing nature),
+and eBPF closes that gap. This is an **architectural** answer to
+"why two layers," not an experimental one.
 
 ---
 
 ## 5. Lessons Learned / Research Findings
 
-Geliştirme sürecinde ortaya çıkan, başlangıçta planlanmamış üç bulgu:
+Three findings that emerged during development and weren't planned
+from the start:
 
-### Bulgu 1: "Recon adımları gözlemlenebilirlik açısından yapısal olarak kördür"
+### Finding 1: "Recon steps are structurally blind from an observability standpoint"
 
-Purple Team modülünü test ederken, recon adımının (salt bir `GET /`
-isteği) hiçbir zaman bir detection sinyaliyle eşleşmediği görüldü.
-İlk bakışta bu bir "bug" gibi göründü, ama kök neden incelemesi
-gösterdi ki bu **doğru bir davranış**: zararsız görünen bir istek,
-tanım olarak hiçbir imza tetiklememeli. Bu, gerçek SOC ortamlarının da
-yaşadığı bir problemin küçük ölçekli bir yansımasıydı - "düşük sinyal/
-gürültü oranlı" trafiğin (recon, tarama) imza-tabanlı sistemlerle
-yakalanamaması yapısal bir sınırlamadır, davranışsal/istatistiksel
-anomali tespiti gerektirir (bu projenin kapsamının bilinçli olarak
-dışında, bkz. Bölüm 2 #6).
+While testing the Purple Team module, it became clear that the recon
+step (a bare `GET /` request) never matched any detection signal. At
+first glance this looked like a bug, but root-cause analysis showed
+it's **correct behavior**: a request that looks benign should, by
+definition, never trigger any signature. This was a small-scale
+reflection of a problem real SOC environments also face — traffic
+with a "low signal-to-noise ratio" (recon, scanning) cannot be caught
+by signature-based systems; that is a structural limitation requiring
+behavioral/statistical anomaly detection (deliberately out of this
+project's scope, see Section 2, #6).
 
-### Bulgu 2: "Aynı CVSS skoru, farklı gerçek risk anlamına gelebilir"
+### Finding 2: "The same CVSS score can mean different real-world risk"
 
-Risk Engine'i çalıştırırken beklenmedik bir sonuç çıktı: CVE-2021-4034
-(PwnKit, CVSS 7.8), CVE-2021-42013'ten (CVSS 9.8, daha yüksek) daha
-yüksek bir bileşik risk skoru aldı (73.5 vs 60.5). Sebep, PwnKit'in
-örnek koşuda **detection coverage'ının %0 olması** (`defense_gap`
-bileşeni tavana çıktı). Bu, formülün doğru çalıştığının kanıtı oldu
-ve ilk tasarım hipotezini (CVSS tek başına yeterli bir öncelik sinyali
-değildir) doğruladı - ama aynı zamanda şunu da gösterdi: **risk
-skorlama formülleri, kendi girdi verisinin kalitesine aşırı hassas
-olabilir.** Tek bir test koşusunda coverage %0 çıktığı için PwnKit
-"yüksek risk" etiketi aldı; gerçek bir operasyonda bu, yanlış
-pozitif bir önceliklendirmeye yol açabilirdi eğer coverage ölçümü
-yetersizse. Ders: bileşik skorlama sistemlerinde her bileşenin
-**kendi güvenilirliği** de ayrıca değerlendirilmeli (örn. "bu CVE için
-sadece 1 saldırı adımı test edildi" uyarısı eklenmeli - Future Work'e
-eklendi).
+Running the Risk Engine produced an unexpected result: CVE-2021-4034
+(PwnKit, CVSS 7.8) received a higher composite risk score than
+CVE-2021-42013 (CVSS 9.8, higher) — 73.5 vs. 60.5. The reason was that
+PwnKit's detection coverage was **0% in the sample run**
+(the `defense_gap` component maxed out). This proved the formula was
+working as intended, confirming the original design hypothesis (CVSS
+alone is not a sufficient prioritization signal) — but it also
+revealed something else: **composite risk-scoring formulas can be
+overly sensitive to the quality of their own input data.** Because
+coverage came out at 0% in a single test run, PwnKit was labeled
+"high risk"; in a real operation, this could have produced a false
+prioritization if the coverage measurement itself were unreliable.
+Lesson: in composite scoring systems, each component's **own
+reliability** also needs to be assessed separately (e.g. a warning
+like "only 1 attack step was tested for this CVE" should be added —
+now in Future Work).
 
-### Bulgu 3: "Format spesifikasyonuna uyumluluk, kütüphane bağımlılığından daha taşınabilir olabilir"
+### Finding 3: "Conforming to a format specification can be more portable than depending on a library"
 
-STIX 2.1 ve TAXII 2.1 modüllerini `stix2`/`taxii2-client` kütüphaneleri
-yerine ham JSON/HTTP ile üretme kararı başlangıçta bir kısıtlama
-(network erişimi olmadan kütüphane kurulamaması) olarak başladı, ama
-sonuçta bir avantaja dönüştü: üretilen çıktı, herhangi bir Python
-sürümü/kütüphane versiyon çatışmasından bağımsız olarak çalışıyor ve
-spesifikasyonun "altında ne olduğu" doğrudan okunabilir durumda. Bu,
-gerçek bir mühendislik prensibini destekliyor: **bağımlılık, bazen
-soyutlamadan daha pahalıdır** - özellikle format zaten iyi
-dokümante edilmiş bir standartsa.
+The decision to produce the STIX 2.1 and TAXII 2.1 modules using raw
+JSON/HTTP instead of the `stix2`/`taxii2-client` libraries started as
+a constraint (the library couldn't be installed without network
+access), but turned out to be an advantage: the resulting output runs
+independently of any Python version/library version conflict, and
+exactly "what's underneath the spec" stays directly readable. This
+supports a real engineering principle: **a dependency is sometimes
+more expensive than the abstraction it provides** — especially when
+the format is already a well-documented standard.
 
-### Bulgu 4: "Aynı aktör kimliği, farklı zaman damgası kaynaklarından geldiğinde yanlış ayrışabilir"
+### Finding 4: "The same actor identity can be incorrectly split apart when it comes from different timestamp sources"
 
-Correlation Engine'i geliştirirken, eBPF kaynaklı olaylar (`user:1000`)
-ile auditd kaynaklı olaylar (`user:1000`) **aynı aktör kimliğine**
-sahip olduğu halde ayrı incident'lar olarak gruplandı. Kök neden:
-eBPF parser'ı şu an gerçek bir syscall zaman damgası yerine collector
-çalıştırma anının zaman damgasını kullanıyor (bkz. Bölüm 2, #4),
-auditd ise olayın gerçek epoch zamanını taşıyor. İki kaynak farklı
-"zaman referans çerçevesi" kullandığında, doğru bir korelasyon motoru
-bile yanlış ayrıştırma yapabilir.
+While developing the Correlation Engine, events originating from eBPF
+(`user:1000`) and events originating from auditd (`user:1000`) — despite
+sharing the **same actor identity** — were grouped into separate
+incidents. Root cause: the eBPF parser currently uses the collector's
+own execution timestamp instead of a real syscall timestamp (see
+Section 2, #4), while auditd carries the event's actual epoch time.
+When two sources use different "time reference frames," even a
+correct correlation engine can mis-split events.
 
-Bu, ilk bakışta bir "bug" gibi göründü ama incelemesi şunu gösterdi:
-**korelasyon motorlarının doğruluğu, kendi girdi verisinin zaman
-senkronizasyon kalitesine bağımlıdır.** Bu, NTP senkronizasyonu zayıf
-olan gerçek dağıtık sistemlerde de yaşanan, literatürde bilinen bir
-problemin (clock skew) küçük ölçekli bir yansımasıdır. Ders: bir
-korelasyon/SIEM motoru değerlendirilirken, sadece algoritmanın mantığı
-değil, **beslediği veri kaynaklarının zaman tutarlılığı** da
-denetlenmeli — aksi halde "doğru algoritma, yanlış veri" sonucu çıkar.
+At first this looked like a bug, but closer inspection showed:
+**a correlation engine's accuracy depends on the time-synchronization
+quality of its own input data.** This is a small-scale reflection of
+a well-known problem (clock skew) seen in real distributed systems
+with weak NTP synchronization. Lesson: when evaluating a correlation/
+SIEM engine, it's not just the algorithm's logic that needs auditing —
+**the time consistency of the data sources feeding it** must be
+audited too, or the result is "correct algorithm, wrong data."
 
 ---
 
-## Kapanış Notu
+## Closing Note
 
-Bu doküman, OBSIDIAN PROTOCOL'ün "bitti" değil "şu an bu durumda, şu
-sebeplerle, sıradaki adım bu" demesini sağlamak için yazıldı. Bir
-sistemin sınırlarını net biçimde ifade edebilmek, sistemi inşa
-etmekten farklı ama eşit derecede değerli bir mühendislik
-yetkinliğidir.
+This document was written to let OBSIDIAN PROTOCOL say not "it's
+done," but "here is its current state, here's why, and here's the
+next step." Being able to clearly state a system's limitations is an
+engineering skill distinct from — and equally valuable as — building
+the system itself.

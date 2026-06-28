@@ -1,33 +1,56 @@
 # ATTACK REPLAY ENGINE
-### OBSIDIAN PROTOCOL / Operasyonu Adım Adım Yeniden Oynatmak
+### OBSIDIAN PROTOCOL / Replaying the Operation Step by Step
 
 ## Problem
 
-Olay sonrası incelemeler genelde statik raporlardır. "08:20 recon,
-08:28 detection" yazmak ile bunu kronolojik, adım-adım bir replay
-olarak göstermek çok farklı bir anlama deneyimi yaratır.
+Post-incident reviews are usually static reports. Writing "08:20
+recon, 08:28 detection" and actually showing it as a chronological,
+step-by-step replay create very different levels of understanding.
 
-## Çözüm
+## Solution
 
-`replay.py`, telemetri + Purple Team verilerini birleştirip operasyonu
-zaman sıralı bir replay olarak sunar. Her adımda: zaman damgası,
-önceki adıma göre delta, OFFENSIVE/DETECTED/SIGNAL/INFO etiketi,
-vector/CVE/MITRE bilgisi.
+`replay.py` merges telemetry and Purple Team data and presents the
+operation as a time-ordered replay. Each step shows: a timestamp, the
+delta since the previous step, an OFFENSIVE/DETECTED/SIGNAL/INFO tag,
+and vector/CVE/MITRE metadata.
 
-## Kullanım
+## Usage
 
 ```bash
-# Anlık (hepsini hemen yazdır)
+# Instant mode (print everything immediately)
 python3 attack-replay/replay.py
 
-# Canlı simülasyon (gerçek zaman aralıklarını 10x hızda oynat)
+# Live simulation (replay real time gaps at 10x speed)
 python3 attack-replay/replay.py --live --speed=10
 ```
 
-## Bilinen Sınırlama
+## Known Limitation
 
-`--live` modu gerçek zaman aralıklarını simüle ediyor ama maksimum
-5 saniye bekleme sınırı var (örnek/test verilerinde saatler/günler
-arası boşluklar olabileceği için sonsuz beklemeyi önlemek amacıyla).
-Gerçek bir operasyon verisiyle (tutarlı, dakikalar içindeki zaman
-damgalarıyla) bu sınır devreye girmez.
+`--live` mode simulates real time gaps, but caps the wait at a
+maximum of 5 seconds (to avoid waiting indefinitely, since
+example/test data can contain gaps of hours or days). With real
+operation data — where timestamps are consistent and fall within
+minutes of each other — this cap never engages.
+
+## Output Format
+
+Each replayed step (`attack-replay/output/replay_timeline.json`) is a
+structured event with the following fields:
+
+| Field | Description |
+|---|---|
+| `timestamp` | ISO-8601 timestamp of the event |
+| `source` | Originating telemetry source (e.g. `apache_access_log`, `auditd`, `ebpf`) |
+| `vector` | `VECTOR-I` or `VECTOR-II`, when applicable |
+| `cve` | The associated CVE identifier, when applicable |
+| `category` | MITRE-aligned category (e.g. `initial_access`) |
+| `mitre_technique` | The mapped MITRE ATT&CK technique ID |
+| `is_offensive_action` | Whether this event represents an attacker action |
+| `is_detection_signal` | Whether this event is itself a detection-relevant signal |
+| `detected_by_purple_team` | Whether the Purple Team validation step actually flagged this event |
+| `raw_message_preview` | A truncated preview of the original raw log line |
+
+This output feeds directly into `reporting/generate_pdf_report.py`
+and `reporting/generate_html_report.py`, so the replay timeline shown
+in the final report is generated from the exact same data structure
+used for the terminal replay above.

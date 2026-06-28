@@ -1,24 +1,24 @@
 /*
-    YARA Kuralı: PwnKit (CVE-2021-4034) Exploit Artifact Tespiti
+    YARA Rule: PwnKit (CVE-2021-4034) Exploit Artifact Detection
 
-    Bu kural, diskte (özellikle /tmp veya /dev/shm gibi yazılabilir
-    geçici dizinlerde) PwnKit exploit'inin bıraktığı karakteristik
-    artifact'leri (sahte gconv-modules dosyası, kötü amaçlı .so) arar.
+    This rule looks for characteristic artifacts left on disk
+    (especially in writable temporary directories such as /tmp or
+    /dev/shm) by the PwnKit exploit — a forged gconv-modules file and
+    a malicious .so.
 
-    Mantık: Gerçek exploit kodlarının (örn. ryaagard'ın halka açık
-    PoC'si) ürettiği evil.so dosyası, gconv() ve gconv_init()
-    fonksiyonlarını belirli bir desende export eder. Normal/meşru
-    gconv modülleri bu fonksiyonları farklı bir context'te
-    (genelde glibc'nin kendi paketlenmiş .so'larında) barındırır,
-    /tmp altında DEĞİL.
+    Rationale: the evil.so produced by real exploit code (e.g. the
+    publicly available PoC by ryaagard) exports the gconv() and
+    gconv_init() functions in a specific pattern. Legitimate gconv
+    modules host these functions in a different context (typically
+    glibc's own packaged .so files), and never under /tmp.
 
-    Referans: Qualys advisory, exploit-db #50689
+    Reference: Qualys advisory, exploit-db #50689
 */
 
 rule PwnKit_Malicious_Gconv_Module
 {
     meta:
-        description = "PwnKit (CVE-2021-4034) exploit'inin diskte bıraktığı sahte gconv shared library'sini tespit eder"
+        description = "Detects the forged gconv shared library left on disk by the PwnKit (CVE-2021-4034) exploit"
         author = "obsidian-protocol-warden"
         date = "2026-06-27"
         cve = "CVE-2021-4034"
@@ -26,32 +26,32 @@ rule PwnKit_Malicious_Gconv_Module
         severity = "critical"
 
     strings:
-        // evil.so içinde her zaman bulunan iki export edilmiş fonksiyon
+        // Two exported functions always present in evil.so
         $func1 = "gconv_init" ascii
         $func2 = "gconv" ascii fullword
 
-        // exploit.c'nin execve çağrısında kullandığı karakteristik
-        // ortam değişkeni deseni
+        // Characteristic environment variable pattern used in
+        // exploit.c's execve() call
         $env_pattern = "PATH=GCONV_PATH=" ascii
 
-        // Sahte gconv-modules dosyasının içeriği (INTERNAL modül
-        // tanımı, meşru sistem dosyalarında farklı formatta olur)
+        // Content of the forged gconv-modules file (INTERNAL module
+        // declaration; legitimate system files use a different format)
         $fake_module = "module\tINTERNAL" ascii
 
-        // setuid(0)/setgid(0)/setgroups(0) zinciri - root'a düşürme
-        // sinyali, küçük .so dosyalarında nadiren görülür
-        $privesc_chain = { E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? }  // 3 ardışık call (setuid/setgid/setgroups)
+        // setuid(0)/setgid(0)/setgroups(0) chain — a privilege-drop-
+        // to-root signal rarely seen in small .so files
+        $privesc_chain = { E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? }  // 3 consecutive calls (setuid/setgid/setgroups)
 
     condition:
         (uint32(0) == 0x464C457F) and  // ELF magic byte
         (($func1 and $func2) or $fake_module or $env_pattern) and
-        filesize < 50KB  // gerçek gconv modülleri genelde daha büyük; bu küçük, amaca özel .so
+        filesize < 50KB  // legitimate gconv modules are typically larger; this is a small, purpose-built .so
 }
 
 rule PwnKit_Exploit_Source_Artifact
 {
     meta:
-        description = "PwnKit exploit kaynak kodunun (C dosyası) karakteristik string desenlerini tespit eder - disk üzerinde bırakılmış kaynak dosyaları için"
+        description = "Detects characteristic string patterns of the PwnKit exploit source code (C file) — for source files left on disk"
         author = "obsidian-protocol-warden"
         date = "2026-06-27"
         cve = "CVE-2021-4034"

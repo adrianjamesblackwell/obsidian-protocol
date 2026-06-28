@@ -1,21 +1,21 @@
 # OBSIDIAN PROTOCOL — Executive Summary
 
-**Üretim Zamanı:** 2026-06-27 11:49 UTC
+**Generated At:** 2026-06-28 18:50 UTC
 
-| Metrik | Değer |
+| Metric | Value |
 |---|---|
 | Risk Level | **HIGH** (60.5/100) |
 | Assets Affected | 1 |
 | Detection Coverage | 75.0% |
 | Patch Required | Yes |
-| Estimated Impact | Medium-High - Saldırı yüzeyi riskli ama tespit kapasitesi mevcut |
+| Estimated Impact | Medium-High - Attack surface is risky but detection capacity exists |
 
-**Özet:** 3 ayrı olay 1 kritik/yüksek önemli incident'e korele edildi.
+**Summary:** 3 separate events were correlated into 1 critical/high-severity incident(s).
 
 ## Recommendations
 
-1. Otomatik yama yönetimi (örn. unattended-upgrades + staging test pipeline)
-2. Güvenlik patch'lerinde regresyon test matrisine 'bilinen bypass teknikleri' eklenmeli
-3. 'NetFlow / Network Traffic Metadata' toplamaya başla -> şu kör taktikleri kapatır: Lateral Movement, Command and Control, Exfiltration, Discovery
+1. Automated patch management (e.g. unattended-upgrades + a staging test pipeline)
+2. Add 'known bypass techniques' to the regression test matrix for security patches
+3. Start collecting 'NetFlow / Network Traffic Metadata' -> closes these blind tactics: Lateral Movement, Command and Control, Exfiltration, Discovery
 
-> Teknik detaylar için: `reports/obsidian_protocol_report.pdf`
+> For technical details: `reports/obsidian_protocol_report.pdf`

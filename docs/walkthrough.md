@@ -1,34 +1,37 @@
-# OBSIDIAN PROTOCOL — Operasyon Günlüğü
-### Saldırı Zinciri: TARGET-49'un Düşüşü
+# OBSIDIAN PROTOCOL — Operation Log
+### Attack Chain: The Fall of TARGET-49
 
-> **Format notu:** Bu doküman bir komut listesi değil, kronolojik bir
-> operasyon günlüğü. Her aşamada üç şeyi bulacaksın: **durum** (senaryo),
-> **kök neden analizi** (neden işe yarıyor), ve **operatör görevi**
-> (çözümü vermeyen, yön veren talimat). Cevap kağıdı değil bu —
-> sıkışırsan ipucu kutularına bak, ama exploit kodunu sen yazacaksın.
+> **Format note:** this document is not a list of commands — it's a
+> chronological operation log. At each stage you'll find three
+> things: the **situation** (scenario), the **root cause analysis**
+> (why it works), and the **operator's task** (a directive that
+> points toward the solution without handing it over). This is not an
+> answer sheet — if you get stuck, check the hint boxes, but you will
+> write the exploit code yourself.
 
 ---
 
-## Durum Brifingi
+## Situation Briefing
 
-**OPERATOR**, range'deki **TARGET-49**'a karşı konuşlandırılıyor.
-Dışarıdan göründüğü kadarıyla sıradan bir Apache kurulumu — ama
-versiyon banner'ı dikkat çekiyor: **2.4.49**. Ekim 2021'de yayınlanmış,
-sadece birkaç hafta yaşamış bir sürüm. Bu pencere içinde, Apache'nin
-path normalization mantığında ciddi bir regresyon vardı.
+**OPERATOR** is deployed against **TARGET-49** in the range. From the
+outside it looks like an ordinary Apache install — but the version
+banner stands out: **2.4.49**. Released in October 2021, it lived for
+only a few weeks. Within that window, Apache's path normalization
+logic had a serious regression.
 
-TARGET-49'un attack surface'i şu an tek bir şey: **HTTP**. Ama bu
-katmandan, doğru zincirle, root shell'e kadar gidilecek.
+TARGET-49's attack surface currently consists of a single thing:
+**HTTP**. But from that one layer, with the right chain, the path
+leads all the way to a root shell.
 
 ```
 [RECON]  →  VECTOR-I [INITIAL ACCESS via path traversal → RCE]  →
 [FOOTHOLD]  →  [LOCAL ENUMERATION]  →
-VECTOR-II [PRIVILEGE ESCALATION via PwnKit]  →  [ROOT — OPERASYON TAMAMLANDI]
+VECTOR-II [PRIVILEGE ESCALATION via PwnKit]  →  [ROOT — OPERATION COMPLETE]
 ```
 
-MITRE ATT&CK eşlemesi:
+MITRE ATT&CK mapping:
 
-| Aşama | Taktik | Teknik |
+| Stage | Tactic | Technique |
 |---|---|---|
 | Recon | Reconnaissance | T1595 (Active Scanning) |
 | VECTOR-I | Initial Access | T1190 (Exploit Public-Facing Application) |
@@ -37,189 +40,196 @@ MITRE ATT&CK eşlemesi:
 
 ---
 
-## Aşama 0: Range'i Devreye Al
+## Stage 0: Bring Up the Range
 
 ```bash
 ./setup.sh
-# veya manuel:
+# or manually:
 docker-compose up -d
 docker exec -it obsidian-operator bash
 ```
 
-OPERATOR kutusundan TARGET-49'a DNS ile erişebilirsin — compose,
-servis adını (`target-49`) otomatik çözer.
+From the OPERATOR box you can reach TARGET-49 over DNS — compose
+automatically resolves the service name (`target-49`).
 
 ---
 
-## Aşama 1: Recon — "TARGET-49 Gerçekten O Zafiyetli Sürüm mü?"
+## Stage 1: Recon — "Is TARGET-49 Really That Vulnerable Version?"
 
-**Durum:** İlk iş, varsayımda bulunmamak. Banner'da "Apache/2.4.49"
-görmek heyecan verici ama gerçek bir operatör (ve sen) bunu doğrular —
-banner spoof edilebilir, ya da hedef zafiyetli sürümde olsa bile
-**konfigürasyon** zafiyeti tetiklemeye izin vermeyebilir.
+**Situation:** the first rule is not to assume anything. Seeing
+"Apache/2.4.49" in the banner is exciting, but a real operator (and
+you) verifies it — the banner can be spoofed, or the target could be
+on the vulnerable version while still not allowing the
+**configuration** prerequisite to be triggered.
 
-**Kök neden bağlamı:** VECTOR-I sadece versiyon meselesi değil — bir
-**konfigürasyon ön koşulu** da var. Apache'nin resmi advisory'sinde
-özellikle belirtildiği gibi, bu zafiyet ancak `Require all denied`
-varsayılanı dışına çıkılmış sistemlerde tetiklenebiliyor.
+**Root cause context:** VECTOR-I isn't purely a version issue — it
+also has a **configuration prerequisite**. As Apache's own advisory
+specifically notes, this vulnerability can only be triggered on
+systems that have moved away from the `Require all denied` default.
 
-**Operatör görevi:**
-- Apache sürümünü HTTP header'larından veya `nmap -sV` ile doğrula
-- `/cgi-bin/` dizininin var olup olmadığını kontrol et — mod_cgi'nin
-  aktif olup olmadığına dair ilk sinyal
-- **Soru:** Sadece versiyon banner'ına güvenip RCE denemeye geçmek
-  neden riskli?
-
----
-
-## VECTOR-I — Aşama 2: Initial Access (Path Traversal)
-
-**Durum:** Şimdi sıra geldi VECTOR-I'i tetiklemeye. Hedef, Apache'nin
-`DocumentRoot` dışındaki dosyaları **okuyup okuyamayacağını** test
-etmek. Önce zararsız bir hedefle (range'in koyduğu sahte secrets
-dosyası) kanıtlayacaksın.
-
-**Kök neden — burası kritik, atlamadan oku:** Apache 2.4.49'da path
-normalization fonksiyonu yeniden yazıldı. Yeni kod, URL'deki encoded
-karakterleri **tek seferde** çözüyordu. `%2e` → `.` çevriliyor, sonuç
-`..` oluşuyor, ve bu reddediliyordu. **Ama** bu encoding'i bir kademe
-daha derinleştirirsen (`%%32%65` gibi), normalization fonksiyonu bunu
-çözmeden traversal kontrolünü yapıyordu. Kontrol geçtikten **sonra**
-asıl decode işlemi gerçekleşiyordu — kontrol, henüz var olmayan `../`
-dizisine bakıyordu.
-
-Bu yüzden **CISA'nın resmi notu önemli**: orijinal CVE-2021-41773
-patch'i sadece tek-seviye encoding'i düzeltti. Apache'nin ilk fix'i
-yetersiz kaldığı için CISA, ikinci bir CVE numarası (CVE-2021-42013)
-açmak zorunda kaldı.
-
-**Operatör görevi:**
-- `ScriptAlias` ile eşleşen bir path (`/cgi-bin/...`) üzerinden,
-  encode edilmiş `../` dizileriyle traversal dene
-- Önce tek-encode dene, çalışmazsa **double-encode** dene — bu,
-  CVE-2021-41773 vs 42013 ayrımını bizzat görmen demek
-- **Doğrulama:** `/opt/internal/secrets.env` içeriğini HTTP
-  response'unda görebiliyorsan, VECTOR-I'in ilk aşaması başarılı
-
-> **İpucu kutusu:** `/cgi-bin/` öneki + encoded traversal + hedef
-> dosya yolu kombinasyonunu dene. ScriptAlias path'i kullanman şart.
+**Operator's task:**
+- Confirm the Apache version from the HTTP headers or via `nmap -sV`
+- Check whether the `/cgi-bin/` directory exists — an early signal of
+  whether mod_cgi is active
+- **Question:** why is it risky to trust the version banner alone and
+  jump straight to attempting RCE?
 
 ---
 
-## VECTOR-I — Aşama 3: Execution (Okumadan Çalıştırmaya Sıçrama)
+## VECTOR-I — Stage 2: Initial Access (Path Traversal)
 
-**Durum:** Dosya okuyabiliyorsun. Soru şu: **bu okuma yeteneğini komut
-çalıştırmaya nasıl çevirirsin?**
+**Situation:** now it's time to trigger VECTOR-I. The goal is to test
+whether Apache can be made to **read** files outside its
+`DocumentRoot`. You'll prove this first against a harmless target (the
+fake secrets file the range has planted).
 
-**Kök neden:** mod_cgi aktifken, Apache belirli path'lere gelen
-istekleri "bu bir CGI script, çalıştır" diye yorumlar. Traversal ile
-path'i sistemde zaten var olan bir interpreter'a (`/bin/sh` gibi)
-yönlendirip, request body'sini "bu script'e girdi" gibi gönderirsen,
-Apache bu body'yi **shell'e komut olarak besler.**
+**Root cause — this part is critical, don't skip it:** in Apache
+2.4.49, the path normalization function was rewritten. The new code
+decoded encoded characters in the URL **in a single pass**. `%2e` was
+converted to `.`, producing `..`, which was then rejected. **But** if
+you add one extra layer of encoding (something like `%%32%65`), the
+normalization function performed the traversal check **before**
+decoding it. The actual decode happened **after** the check passed —
+the check was looking at a `../` sequence that didn't exist yet.
 
-**Operatör görevi:**
-- POST request ile, traversal path'ini bir shell interpreter'a
-  yönlendirip body'de zararsız bir komut (`id`, `whoami`) çalıştırmayı
-  dene
-- **Kritik soru:** Bu komut hangi kullanıcı olarak çalışıyor?
-  Dockerfile'a geri dön — TARGET-49'da Apache hangi kullanıcı altında
-  çalışıyor?
+This is why **CISA's official note matters**: the original
+CVE-2021-41773 patch only fixed single-level encoding. Because
+Apache's first fix proved insufficient, CISA had to open a second CVE
+number (CVE-2021-42013).
 
-> **İpucu kutusu:** Content-Type header'ını CGI'nin script gibi
-> yorumlayacağı şekilde ayarlaman ve body'de komutunu (`echo; id`)
-> vermen gerekiyor.
+**Operator's task:**
+- Through a path that matches a `ScriptAlias` (`/cgi-bin/...`), attempt
+  traversal using encoded `../` sequences
+- Try single-encoding first; if that fails, try **double-encoding** —
+  this is how you'll personally observe the CVE-2021-41773 vs 42013
+  distinction
+- **Verification:** if you can see the contents of
+  `/opt/internal/secrets.env` in the HTTP response, the first stage of
+  VECTOR-I has succeeded
 
----
-
-## Aşama 4: Foothold — Shell'i Stabilize Etmek
-
-**Durum:** RCE elde edildi (VECTOR-I tamamlandı) ama her komutu tek
-seferlik HTTP isteğiyle göndermek hem yavaş hem kırılgan. Burada
-**interaktif bir shell**'e geçilir.
-
-**Operatör görevi:**
-- OPERATOR kutusunda bir listener aç (reverse shell senaryosu — range
-  izole olduğu için bağlantı sadece `obsidian-range` içinde kalır)
-- RCE üzerinden, TARGET-49'dan bu listener'a bağlanacak bir reverse
-  shell tetikle
-- Shell'i stabilize et
-
-**Doğrulama:** `id` çalıştırdığında `labuser` görmen gerekiyor.
+> **Hint box:** try combining the `/cgi-bin/` prefix + encoded
+> traversal + target file path. Using the ScriptAlias path is
+> mandatory.
 
 ---
 
-## Aşama 5: Local Enumeration
+## VECTOR-I — Stage 3: Execution (From Reading to Running Commands)
 
-**Durum:** `labuser` olarak bir shell var ama bu yeterli değil. Burada
-sistematik bir keşif yapılır: SUID binary'ler, sudo izinleri, kurulu
-paketler.
+**Situation:** you can read files. The question now is: **how do you
+turn this read capability into command execution?**
 
-**Operatör görevi:**
-- `ls -la /usr/bin/pkexec` ile SUID bitini doğrula (`-rwsr-xr-x`)
-- `dpkg -l | grep policykit` ile sürümü doğrula
+**Root cause:** with mod_cgi active, Apache interprets requests to
+certain paths as "this is a CGI script, execute it." If you use
+traversal to point that path at an interpreter that already exists on
+the system (such as `/bin/sh`), and send the request body as "input
+to this script," Apache **feeds that body to the shell as a
+command.**
 
----
+**Operator's task:**
+- Using a POST request, point the traversal path at a shell
+  interpreter and try running a harmless command (`id`, `whoami`) via
+  the body
+- **Critical question:** which user does this command run as? Go back
+  to the Dockerfile — which user does Apache run under on TARGET-49?
 
-## VECTOR-II — Aşama 6: Privilege Escalation (PwnKit'in Anatomisi)
-
-**Durum:** Burası operasyonun en öğretici kısmı, çünkü PwnKit bir
-**buffer overflow değil** — bir **mantık hatası**.
-
-**Kök neden — detaylı:**
-
-`pkexec`, normal kullanımda her zaman en az bir argümanla çağrılır.
-`pkexec`'in C kodu, argümanları işlerken `argv[1]`'den başlayan bir
-döngü kullanıyordu — `argv[0]` atlanıyordu, mantıklı bir varsayımla:
-"argc en az 1'dir."
-
-Ama `execve()` sistem çağrısını **doğrudan**, argv dizisini tamamen
-boş (`argc=0`) bırakarak çağırırsan, bu varsayım çöker. `pkexec`
-artık var olmayan `argv[1]`'i okumaya çalışır ve bellek sınırlarının
-dışına taşar — bu bir **out-of-bounds read/write**. Taşan kısım,
-process'in **environment variable** dizisine denk geliyor.
-
-Burada devreye `GCONV_PATH` giriyor: glibc, karakter seti dönüşümü
-yaparken `GCONV_PATH` değişkenindeki dizinlere bakıp uygun bir "gconv
-modülü" (`.so` dosyası) yükler. Geçersiz bir `CHARSET` değeri
-verirsen, glibc bu dönüşümü yapacak bir modül aramaya başlar — ve
-`GCONV_PATH`'i kontrol ettiğin bir dizine işaret ettirirsen, **kendi
-yazdığın `.so` dosyasını** root yetkisiyle çalıştırmasını sağlarsın.
-
-**Bunun bu kadar güçlü olmasının sebebi:** Bu kod yolu, `pkexec`'in
-normal yetki kontrolünden **önce** çalışıyor. Exploit, kimlik
-doğrulama mantığına hiç girmiyor — bu da onu hem trivially
-exploitable hem de (WARDEN modülünde göreceğin gibi) auth log'larda
-**görünmez** yapıyor.
-
-**Operatör görevi:**
-- `execve()`'yi argv dizisi boş olacak şekilde çağıran bir C programı
-  yazman gerekiyor
-- Sahte bir `gconv-modules` dosyası ve onu "modül" gibi gösterecek bir
-  `.so` dosyası hazırlaman gerekiyor — bu `.so` içinde, root
-  yetkisiyle çalışacak `gconv_init()` fonksiyonu `setuid(0)` + shell
-  spawn etmeli
-
-> **İpucu kutusu:** Qualys'in orijinal teknik advisory'si (2022-01-25)
-> bu zincirin her adımını açıklıyor. Anahtar kelimeler: `GCONV_PATH`,
-> `gconv-modules` dosya formatı, `CHARSET` environment variable.
-
-**Doğrulama:** Exploit öncesi `id` → `uid=1000(labuser)`. Exploit
-sonrası `id` → `uid=0(root)`. **OPERASYON TAMAMLANDI.**
+> **Hint box:** you need to set the Content-Type header so CGI
+> interprets the request as a script invocation, and supply your
+> command (`echo; id`) in the body.
 
 ---
 
-## Aşama 7: Kanıt Toplama ve Zaman Çizelgesi
+## Stage 4: Foothold — Stabilizing the Shell
 
-`reports/exploitation-evidence.md` şablonunu doldururken zaman
-damgalarını unutma — bu, operasyon raporunun en önemli kanıtı.
+**Situation:** RCE has been achieved (VECTOR-I is complete), but
+sending every command as a one-off HTTP request is both slow and
+fragile. This is where you move to an **interactive shell**.
+
+**Operator's task:**
+- Open a listener on the OPERATOR box (a reverse shell scenario — since
+  the range is isolated, the connection stays entirely within
+  `obsidian-range`)
+- Through the RCE, trigger a reverse shell from TARGET-49 back to that
+  listener
+- Stabilize the shell
+
+**Verification:** running `id` should show `labuser`.
 
 ---
 
-## Geriye Dönüp Bakış: Bu Zincir Neden "Gerçekçi"?
+## Stage 5: Local Enumeration
 
-VECTOR-I + VECTOR-II'nin birleşimi, gerçek dünyadaki standart saldırı
-yapısını yansıtıyor: dış yüzeyden RCE ile içeri gir, sonra local
-privilege escalation ile genişlet. Gerçek kampanya verisi (AndroxGh0st
-botnet dahil) için `docs/threat-intelligence.md`'ye geç. Bu saldırının
-nasıl yakalandığını incelemek için `detection/README.md` (WARDEN
-modülü).
+**Situation:** you have a shell as `labuser`, but that's not enough.
+This is where systematic enumeration happens: SUID binaries, sudo
+permissions, installed packages.
+
+**Operator's task:**
+- Confirm the SUID bit with `ls -la /usr/bin/pkexec` (`-rwsr-xr-x`)
+- Confirm the version with `dpkg -l | grep policykit`
+
+---
+
+## VECTOR-II — Stage 6: Privilege Escalation (The Anatomy of PwnKit)
+
+**Situation:** this is the most instructive part of the operation,
+because PwnKit is **not a buffer overflow** — it's a **logic error**.
+
+**Root cause — in detail:**
+
+`pkexec`, in normal use, is always invoked with at least one
+argument. Its C code processed arguments in a loop starting from
+`argv[1]` — `argv[0]` was skipped, under the reasonable-looking
+assumption that "argc is always at least 1."
+
+But if you invoke the `execve()` syscall **directly**, leaving the
+argv array completely empty (`argc=0`), that assumption breaks.
+`pkexec` then tries to read a nonexistent `argv[1]` and reads past the
+end of allocated memory — an **out-of-bounds read/write**. The memory
+it reads past the boundary into happens to be the process's
+**environment variable** array.
+
+This is where `GCONV_PATH` comes in: when performing character-set
+conversion, glibc looks at the directories listed in the
+`GCONV_PATH` variable to load an appropriate "gconv module" (a `.so`
+file). If you supply an invalid `CHARSET` value, glibc starts
+searching for a module to perform that conversion — and if you point
+`GCONV_PATH` at a directory you control, you can make it load
+**your own `.so` file**, with root privileges.
+
+**The reason this is so powerful:** this code path executes
+**before** pkexec's normal authorization check. The exploit never
+enters the authentication logic at all — which makes it both
+trivially exploitable and (as you'll see in the WARDEN module)
+**invisible** in auth logs.
+
+**Operator's task:**
+- Write a C program that invokes `execve()` with an empty argv array
+- Prepare a fake `gconv-modules` file and a `.so` file that presents
+  itself as a "module" — inside that `.so`, the `gconv_init()`
+  function (which will run with root privileges) should call
+  `setuid(0)` and spawn a shell
+
+> **Hint box:** Qualys's original technical advisory (2022-01-25)
+> walks through every step of this chain. Key terms: `GCONV_PATH`, the
+> `gconv-modules` file format, the `CHARSET` environment variable.
+
+**Verification:** before the exploit, `id` → `uid=1000(labuser)`.
+After the exploit, `id` → `uid=0(root)`. **OPERATION COMPLETE.**
+
+---
+
+## Stage 7: Evidence Collection and Timeline
+
+While filling in the `reports/exploitation-evidence.md` template,
+don't forget the timestamps — they are the single most important
+piece of evidence in the operation report.
+
+---
+
+## Looking Back: Why Is This Chain "Realistic"?
+
+The combination of VECTOR-I + VECTOR-II mirrors the standard
+real-world attack structure: get in from the external surface via
+RCE, then expand through local privilege escalation. For real
+campaign data (including the AndroxGh0st botnet), go to
+`docs/threat-intelligence.md`. To see how this attack gets caught,
+see `detection/README.md` (the WARDEN module).

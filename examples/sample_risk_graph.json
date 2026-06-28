@@ -6,15 +6,15 @@
       "node_type": "asset",
       "risk_score": null,
       "risk_band": null,
-      "evidence": "Saldırının başlangıç noktası - dış ağ"
+      "evidence": "Starting point of the attack - external network"
     },
     {
       "node_id": "target49",
       "label": "TARGET-49 (Apache 2.4.49)",
       "node_type": "asset",
       "risk_score": 60.5,
-      "risk_band": "YÜKSEK",
-      "evidence": "docker/target-49/Dockerfile - gerçek imaj"
+      "risk_band": "HIGH",
+      "evidence": "docker/target-49/Dockerfile - the real image"
     },
     {
       "node_id": "shell",
@@ -22,39 +22,39 @@
       "node_type": "compromise_state",
       "risk_score": null,
       "risk_band": null,
-      "evidence": "docs/walkthrough.md Aşama 4 - RCE üzerinden elde edilen shell"
+      "evidence": "docs/walkthrough.md Stage 4 - shell obtained via RCE"
     },
     {
       "node_id": "root",
       "label": "root (TARGET-49)",
       "node_type": "compromise_state",
       "risk_score": 48.5,
-      "risk_band": "ORTA",
-      "evidence": "docs/walkthrough.md Aşama 6 - PwnKit ile doğrulanmış"
+      "risk_band": "MEDIUM",
+      "evidence": "docs/walkthrough.md Stage 6 - confirmed via PwnKit"
     },
     {
       "node_id": "creddump",
-      "label": "Credential Dump (varsayımsal)",
+      "label": "Credential Dump (hypothetical)",
       "node_type": "hypothetical",
       "risk_score": null,
       "risk_band": null,
-      "evidence": "GERÇEKTEN EXPLOİT EDİLMEDİ - projeksiyon"
+      "evidence": "NOT ACTUALLY EXPLOITED - projection"
     },
     {
       "node_id": "lateral",
-      "label": "Lateral Movement (varsayımsal)",
+      "label": "Lateral Movement (hypothetical)",
       "node_type": "hypothetical",
       "risk_score": null,
       "risk_band": null,
-      "evidence": "GERÇEKTEN EXPLOİT EDİLMEDİ - projeksiyon"
+      "evidence": "NOT ACTUALLY EXPLOITED - projection"
     },
     {
       "node_id": "database",
-      "label": "Database (varsayımsal hedef)",
+      "label": "Database (hypothetical target)",
       "node_type": "hypothetical",
       "risk_score": null,
       "risk_band": null,
-      "evidence": "GERÇEKTEN EXPLOİT EDİLMEDİ - projeksiyon, örnek 'son hedef'"
+      "evidence": "NOT ACTUALLY EXPLOITED - projection, illustrative 'end target'"
     }
   ],
   "edges": [
@@ -69,7 +69,7 @@
     {
       "source": "target49",
       "target": "shell",
-      "label": "CGI yönlendirme ile komut çalıştırma",
+      "label": "Command execution via CGI redirection",
       "mitre_technique": "T1059",
       "cve": "CVE-2021-42013",
       "confirmed": true
@@ -85,7 +85,7 @@
     {
       "source": "root",
       "target": "creddump",
-      "label": "(varsayımsal) /etc/shadow veya bellek dump",
+      "label": "(hypothetical) /etc/shadow or memory dump",
       "mitre_technique": "T1003",
       "cve": null,
       "confirmed": false
@@ -93,7 +93,7 @@
     {
       "source": "creddump",
       "target": "lateral",
-      "label": "(varsayımsal) çalınan kimlik bilgisiyle SSH",
+      "label": "(hypothetical) SSH using a stolen credential",
       "mitre_technique": "T1021",
       "cve": null,
       "confirmed": false
@@ -101,7 +101,7 @@
     {
       "source": "lateral",
       "target": "database",
-      "label": "(varsayımsal) DB sunucusuna erişim",
+      "label": "(hypothetical) access to the DB server",
       "mitre_technique": "T1213",
       "cve": null,
       "confirmed": false

@@ -1,37 +1,37 @@
 graph TB
-    subgraph Range["OBSIDIAN-RANGE (internal: true — internete kapalı)"]
-        OP[OPERATOR<br/>obsidian-operator<br/>Kali tabanlı / nmap, python3, exploit kodu]
+    subgraph Range["OBSIDIAN-RANGE (internal: true — no internet access)"]
+        OP[OPERATOR<br/>obsidian-operator<br/>Kali-based / nmap, python3, exploit code]
         T49[TARGET-49<br/>obsidian-target-49<br/>Apache 2.4.49 + PwnKit]
 
-        OP -->|"1. RECON<br/>versiyon + config doğrulama"| T49
+        OP -->|"1. RECON<br/>version + config verification"| T49
         OP -->|"2. VECTOR-I: INITIAL ACCESS<br/>CVE-2021-41773/42013<br/>path traversal"| T49
-        OP -->|"3. VECTOR-I: EXECUTION → RCE<br/>CGI yönlendirme ile<br/>komut çalıştırma"| T49
+        OP -->|"3. VECTOR-I: EXECUTION → RCE<br/>command execution via<br/>CGI redirection"| T49
         T49 -->|"4. FOOTHOLD<br/>reverse shell → labuser"| OP
         T49 -->|"5-6. VECTOR-II: PRIVESC<br/>CVE-2021-4034 PwnKit<br/>labuser → root"| T49
     end
 
-    subgraph Sigint["SIGINT MODÜLÜ (Threat Intelligence)"]
+    subgraph Sigint["SIGINT MODULE (Threat Intelligence)"]
         NVD[NVD API<br/>CVSS, CWE]
-        KEV[CISA KEV Feed<br/>Gerçek exploitation kanıtı]
-        CSA[CISA/FBI AA24-016A<br/>AndroxGh0st botnet IOC'leri]
+        KEV[CISA KEV Feed<br/>Real exploitation evidence]
+        CSA[CISA/FBI AA24-016A<br/>AndroxGh0st botnet IOCs]
         Script[fetch_cve_intel.py]
-        Analysis[threat-intelligence.md<br/>sektör + botnet analizi]
+        Analysis[threat-intelligence.md<br/>sector + botnet analysis]
 
         NVD --> Script
         KEV --> Script
         Script --> Analysis
-        CSA -.manuel derleme.-> Analysis
+        CSA -.manual compilation.-> Analysis
     end
 
-    subgraph Warden["WARDEN MODÜLÜ (Detection Engineering)"]
-        SigmaA[Sigma: VECTOR-I<br/>access log tabanlı]
-        SigmaP[Sigma: VECTOR-II<br/>auditd syscall tabanlı]
+    subgraph Warden["WARDEN MODULE (Detection Engineering)"]
+        SigmaA[Sigma: VECTOR-I<br/>access-log based]
+        SigmaP[Sigma: VECTOR-II<br/>auditd syscall based]
         Yara[YARA: PwnKit<br/>.so/gconv-modules artifact]
-        Patch[Patch tablosu +<br/>MITRE ATT&CK eşlemesi]
+        Patch[Patch table +<br/>MITRE ATT&CK mapping]
     end
 
-    Range -.saldırı paterni.-> Warden
-    Analysis -.istihbarat bağlamı.-> Range
+    Range -.attack pattern.-> Warden
+    Analysis -.intelligence context.-> Range
 
     style Range fill:#1a1a2e,stroke:#e94560,color:#fff
     style Sigint fill:#16213e,stroke:#0f3460,color:#fff
