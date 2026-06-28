@@ -1,15 +1,24 @@
-# OBSIDIAN PROTOCOL
-### Evidence-Driven Security Reasoning Platform
+<p align="center">
+  <img src="docs/assets/blackwell_logo.png" alt="Blackwell Intelligence" width="520">
+</p>
 
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
-![License](https://img.shields.io/badge/License-Educational%2FPortfolio-blue)
-![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-mapped-d6293e)
-![STIX](https://img.shields.io/badge/STIX-2.1-orange)
-![TAXII](https://img.shields.io/badge/TAXII-2.1-orange)
-![Sigma](https://img.shields.io/badge/Sigma-rules-6cc644)
-![YARA](https://img.shields.io/badge/YARA-rules-6cc644)
-![Modules](https://img.shields.io/badge/Modules-17%20%2B%20Blackwell%20Core-e94560)
-![Status](https://img.shields.io/badge/Status-Lab%20Verified-success)
+<h1 align="center">OBSIDIAN PROTOCOL</h1>
+<p align="center"><strong>Evidence-Driven Security Reasoning Platform</strong></p>
+<p align="center">by <a href="https://github.com/adrianjamesblackwell">Adrian James Blackwell</a> · <a href="https://github.com/adrianjamesblackwell">github.com/adrianjamesblackwell</a></p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
+  <img src="https://img.shields.io/badge/License-Educational%2FPortfolio-blue" alt="License">
+  <img src="https://img.shields.io/badge/Status-Lab%20Verified-success" alt="Status">
+  <img src="https://img.shields.io/badge/Modules-17%20%2B%20Blackwell%20Core-e94560" alt="Modules">
+</p>
+<p align="center">
+  <img src="https://img.shields.io/badge/MITRE%20ATT%26CK-mapped-d6293e" alt="MITRE ATT&CK">
+  <img src="https://img.shields.io/badge/STIX-2.1-orange" alt="STIX 2.1">
+  <img src="https://img.shields.io/badge/TAXII-2.1-orange" alt="TAXII 2.1">
+  <img src="https://img.shields.io/badge/Sigma-rules-6cc644" alt="Sigma rules">
+  <img src="https://img.shields.io/badge/YARA-rules-6cc644" alt="YARA rules">
+</p>
 
 > **Classification:** Educational / Portfolio. All operations were
 > conducted in an isolated lab environment with no internet access. No
@@ -379,3 +388,16 @@ environment**. No scanning, exploitation, or unauthorized access
 attempt was made against any real or third-party system. The
 techniques shown here should only be used on systems you own or have
 written authorization to test.
+
+---
+
+<p align="center">
+  <img src="docs/assets/blackwell_logo.png" alt="Blackwell Intelligence" width="280">
+</p>
+
+<p align="center">
+  <strong>Adrian James Blackwell</strong><br>
+  <a href="https://github.com/adrianjamesblackwell">github.com/adrianjamesblackwell</a>
+</p>
+
+<p align="center"><sub>OBSIDIAN PROTOCOL is an independent research and portfolio project by Blackwell Intelligence.</sub></p>
