@@ -1,0 +1,62 @@
+title: Apache HTTP Server Path Traversal / RCE Exploitation Attempt (CVE-2021-41773 / CVE-2021-42013)
+id: 7f2c8e4a-3b91-4e2d-9a7c-1d5e6f8a9b3c
+status: stable
+description: |
+    Apache HTTP Server 2.4.49/2.4.50'ye karşı path traversal ve RCE
+    denemelerini tespit eder. Encode edilmiş "../" dizilerinin
+    ScriptAlias path'leri (örn. /cgi-bin/) üzerinden kullanılmasını
+    arar. Bu, normalization fonksiyonunun URL-encoded traversal
+    karakterlerini doğru reddetmemesi nedeniyle çalışır.
+
+    Bu kural ayrıca FBI/CISA'nın Androxgh0st advisory'sinde (AA24-016A)
+    paylaştığı gerçek IOC desenlerini de içerir: bu CVE, gerçek dünyada
+    Laravel .env dosyalarını çalan bir botnet tarafından aktif olarak
+    taranıyor.
+references:
+    - https://httpd.apache.org/security/CVE-2021-41773.html
+    - https://httpd.apache.org/security/CVE-2021-42013.html
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-016a
+author: obsidian-protocol-warden
+date: 2026/06/27
+logsource:
+    category: webserver
+    product: apache
+detection:
+    # Aşama A: Klasik path traversal denemesi - encode edilmiş ../ dizileri
+    # ScriptAlias path'i (/cgi-bin/) ile birlikte
+    selection_traversal:
+        cs_uri_stem|contains: '/cgi-bin/'
+        cs_uri_query|contains:
+            - '%2e%2e/'
+            - '%2e%2e%2f'
+            - '%%32%65%%32%65%%32%66'   # double-encoded ../ (CVE-2021-42013'ün asıl atlattığı desen)
+            - '..%2f'
+            - '..%c0%af'                 # alternatif UTF-8 overlong encoding
+
+    # Aşama B: RCE'ye sıçrama - traversal path'i bir shell interpreter'a
+    # yönlendiriliyor (gerçek exploit PoC'lerinde görülen desen)
+    selection_rce:
+        cs_method: 'POST'
+        cs_uri_stem|contains: '/cgi-bin/'
+        cs_uri_stem|contains:
+            - '/bin/sh'
+            - '/bin/bash'
+
+    # Aşama C: Androxgh0st botnet IOC'leri (FBI/CISA AA24-016A'dan,
+    # gerçek dünyada bu CVE ile birlikte aranan paralel desenler)
+    selection_androxgh0st:
+        cs_uri_stem|contains:
+            - '/.env'
+            - '/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php'
+        cs_referrer|contains: 'androxgh0st'
+
+    condition: 1 of selection_*
+falsepositives:
+    - Meşru CGI script kullanımı (nadir, modern ortamlarda mod_cgi genelde kapalı)
+    - Güvenlik tarama araçları (Qualys QID 150372-150374, Nessus) kendi taramalarında benzer istekler üretir
+level: critical
+tags:
+    - attack.initial_access
+    - attack.t1190          # Exploit Public-Facing Application
+    - cve.2021-41773
+    - cve.2021-42013

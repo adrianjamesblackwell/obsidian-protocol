@@ -1,0 +1,76 @@
+[
+  {
+    "incident_id": "b2b3dc9b",
+    "first_seen": "2026-06-27T10:15:32+00:00",
+    "last_seen": "2026-06-27T10:15:40+00:00",
+    "actor_key": "ip:172.18.0.3",
+    "raw_event_count": 2,
+    "mitre_chain": [
+      "T1190",
+      "T1059"
+    ],
+    "cve_chain": [
+      "CVE-2021-41773",
+      "CVE-2021-42013"
+    ],
+    "vectors": [
+      "VECTOR-I"
+    ],
+    "confidence": 95.0,
+    "confidence_rationale": "Tam eşleşme: bilinen kill-chain paterni T1190 -> T1059",
+    "severity": "HIGH",
+    "raw_event_ids": [
+      "ef203db5-1e19-4e2b-b03d-6a60c708a465",
+      "cc5f1d5c-0154-4e15-9322-9a6e6800b1df"
+    ],
+    "narrative": "apache_access_log kaynağından 'initial_access' (CVE-2021-41773) ardından apache_access_log kaynağından 'execution' (CVE-2021-42013)"
+  },
+  {
+    "incident_id": "e023c12b",
+    "first_seen": "2026-06-27T10:18:05+00:00",
+    "last_seen": "2026-06-27T10:18:05+00:00",
+    "actor_key": "user:1000",
+    "raw_event_count": 1,
+    "mitre_chain": [
+      "T1548.001"
+    ],
+    "cve_chain": [
+      "CVE-2021-4034"
+    ],
+    "vectors": [
+      "VECTOR-II"
+    ],
+    "confidence": 20.0,
+    "confidence_rationale": "Tek bir teknik gözlendi, zincir oluşturulamadı",
+    "severity": "LOW",
+    "raw_event_ids": [
+      "aaeb5b67-e320-4f84-a1dd-c39ab213b31e"
+    ],
+    "narrative": "auditd kaynağından 'privilege_escalation' (CVE-2021-4034)"
+  },
+  {
+    "incident_id": "813ab05d",
+    "first_seen": "2026-06-27T11:48:57.967229+00:00",
+    "last_seen": "2026-06-27T11:48:57.967267+00:00",
+    "actor_key": "user:1000",
+    "raw_event_count": 2,
+    "mitre_chain": [
+      "T1548.001",
+      "T1548.001"
+    ],
+    "cve_chain": [
+      "CVE-2021-4034"
+    ],
+    "vectors": [
+      "VECTOR-II"
+    ],
+    "confidence": 40.0,
+    "confidence_rationale": "Birden fazla teknik var (T1548.001, T1548.001) ama tanınan bir zincire uymuyor",
+    "severity": "MEDIUM",
+    "raw_event_ids": [
+      "e2608e2e-a69b-4203-b89d-4117089a994d",
+      "85c76e2c-32c0-43b7-b8b1-8d3de496c2d0"
+    ],
+    "narrative": "ebpf kaynağından 'privilege_escalation' (CVE-2021-4034) ardından ebpf kaynağından 'privilege_escalation' (CVE-2021-4034)"
+  }
+]

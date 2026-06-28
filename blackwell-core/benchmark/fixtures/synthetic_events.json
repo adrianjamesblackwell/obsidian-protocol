@@ -1,0 +1,67 @@
+{
+  "description": "Synthetic, hand-labeled telemetry event set for benchmarking BCA (Blackwell Correlation Algorithm). Ground-truth incident boundaries were assigned by construction, not inferred -- this fixture is built so we already know the correct answer, which is the only way precision/recall on incident-boundary detection means anything. Three scenarios are included: (1) a clean two-actor case that should produce exactly 2 incidents, (2) a noisy single-actor case with an out-of-window straggler event that should split into 2 incidents despite sharing an actor, (3) an unmatched-pattern case to exercise the 0.40-confidence branch.",
+  "events": [
+    {
+      "event_id": "syn-001", "timestamp": "2026-01-01T00:00:00+00:00",
+      "mitre_technique": "T1190", "actor_key": "ip:10.0.0.1",
+      "ground_truth_incident": "A", "scenario": "clean_two_actor"
+    },
+    {
+      "event_id": "syn-002", "timestamp": "2026-01-01T00:00:30+00:00",
+      "mitre_technique": "T1059", "actor_key": "ip:10.0.0.1",
+      "ground_truth_incident": "A", "scenario": "clean_two_actor"
+    },
+    {
+      "event_id": "syn-003", "timestamp": "2026-01-01T00:01:00+00:00",
+      "mitre_technique": "T1548.001", "actor_key": "ip:10.0.0.1",
+      "ground_truth_incident": "A", "scenario": "clean_two_actor"
+    },
+    {
+      "event_id": "syn-004", "timestamp": "2026-01-01T00:00:05+00:00",
+      "mitre_technique": "T1190", "actor_key": "ip:10.0.0.2",
+      "ground_truth_incident": "B", "scenario": "clean_two_actor"
+    },
+    {
+      "event_id": "syn-005", "timestamp": "2026-01-01T00:00:50+00:00",
+      "mitre_technique": "T1059", "actor_key": "ip:10.0.0.2",
+      "ground_truth_incident": "B", "scenario": "clean_two_actor"
+    },
+    {
+      "event_id": "syn-006", "timestamp": "2026-01-01T01:00:00+00:00",
+      "mitre_technique": "T1190", "actor_key": "user:alice",
+      "ground_truth_incident": "C", "scenario": "noisy_straggler"
+    },
+    {
+      "event_id": "syn-007", "timestamp": "2026-01-01T01:00:40+00:00",
+      "mitre_technique": "T1059", "actor_key": "user:alice",
+      "ground_truth_incident": "C", "scenario": "noisy_straggler"
+    },
+    {
+      "event_id": "syn-008", "timestamp": "2026-01-01T01:30:00+00:00",
+      "mitre_technique": "T1548.001", "actor_key": "user:alice",
+      "ground_truth_incident": "D",
+      "scenario": "noisy_straggler",
+      "note": "Deliberately placed 29m20s after syn-007 -- outside the default 300s window, so a correct implementation must split this into a SEPARATE incident from C despite the shared actor."
+    },
+    {
+      "event_id": "syn-009", "timestamp": "2026-01-01T02:00:00+00:00",
+      "mitre_technique": "T1071", "actor_key": "ip:10.0.0.3",
+      "ground_truth_incident": "E", "scenario": "unmatched_pattern"
+    },
+    {
+      "event_id": "syn-010", "timestamp": "2026-01-01T02:00:10+00:00",
+      "mitre_technique": "T1041", "actor_key": "ip:10.0.0.3",
+      "ground_truth_incident": "E",
+      "scenario": "unmatched_pattern",
+      "note": "T1071 -> T1041 (C2 -> Exfiltration) is not in BCA's bundled KNOWN_CHAIN_PATTERNS, which only encodes this project's own VECTOR-I/II chain. A correct run should group these into one incident at the 0.40 'multiple techniques, unrecognized chain' confidence level -- this exercises that branch honestly rather than only testing the cases BCA is tuned for."
+    }
+  ],
+  "expected_incident_count": 5,
+  "expected_incidents": {
+    "A": ["syn-001", "syn-002", "syn-003"],
+    "B": ["syn-004", "syn-005"],
+    "C": ["syn-006", "syn-007"],
+    "D": ["syn-008"],
+    "E": ["syn-009", "syn-010"]
+  }
+}

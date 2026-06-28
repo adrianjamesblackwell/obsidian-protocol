@@ -1,0 +1,31 @@
+[
+  {
+    "description": "VECTOR-I: Apache version verification (recon)",
+    "vector": "VECTOR-I",
+    "cve": null,
+    "mitre_technique": "T1595",
+    "timestamp": "2026-06-27T10:15:00+00:00",
+    "_note": "This step has no Sigma signature of its own (a plain GET / request is harmless) - expected result is MISSED"
+  },
+  {
+    "description": "VECTOR-I: Reading secrets.env via path traversal",
+    "vector": "VECTOR-I",
+    "cve": "CVE-2021-41773",
+    "mitre_technique": "T1190",
+    "timestamp": "2026-06-27T10:15:32+00:00"
+  },
+  {
+    "description": "VECTOR-I: RCE via CGI redirection (command execution)",
+    "vector": "VECTOR-I",
+    "cve": "CVE-2021-42013",
+    "mitre_technique": "T1059",
+    "timestamp": "2026-06-27T10:15:40+00:00"
+  },
+  {
+    "description": "VECTOR-II: Escalation to root via the PwnKit exploit",
+    "vector": "VECTOR-II",
+    "cve": "CVE-2021-4034",
+    "mitre_technique": "T1548.001",
+    "timestamp": "2026-06-27T10:18:00+00:00"
+  }
+]

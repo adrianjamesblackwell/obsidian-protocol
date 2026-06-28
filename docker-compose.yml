@@ -1,0 +1,61 @@
+version: "3.8"
+
+# ============================================================
+# OBSIDIAN PROTOCOL — ISOLATED RANGE DEFINITION
+#
+# İZOLASYON GARANTİSİ:
+#   - "obsidian-range" internal:true olarak tanımlı -> bu ağdaki
+#     hiçbir container internete veya host'un diğer ağlarına
+#     çıkış yapamaz.
+#   - target-49 dışarıya port açmaz (sadece range içinde
+#     erişilebilir). Test sırasında host'tan erişmek istersen
+#     aşağıdaki "ports" satırını aç, ama bunu sadece kendi izole
+#     makinende / VM'inde yap.
+# ============================================================
+
+networks:
+  obsidian-range:
+    internal: true   # <-- KRİTİK: bu olmadan container internete çıkabilir
+    driver: bridge
+
+services:
+  # TARGET-49 — VECTOR-I/II'nin uygulandığı hedef sistem
+  # (Apache 2.4.49 + PwnKit zafiyetli polkit sürümü)
+  target-49:
+    build:
+      context: ./docker/target-49
+    container_name: obsidian-target-49
+    hostname: target-49
+    networks:
+      - obsidian-range
+    # ports:
+    #   - "8080:80"   # Sadece host'tan manuel test için, isteğe bağlı
+    cap_add:
+      - AUDIT_CONTROL   # auditd'nin VECTOR-II syscall'larını izlemesi için gerekli
+      - AUDIT_WRITE
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: "no"
+
+  # OPERATOR — saldırı zincirinin yürütüldüğü kutu
+  operator:
+    build:
+      context: ./docker/operator
+    container_name: obsidian-operator
+    hostname: operator
+    networks:
+      - obsidian-range
+    tty: true
+    stdin_open: true
+    depends_on:
+      target-49:
+        condition: service_healthy
+    volumes:
+      - ./reports:/opt/obsidian/reports
+      - ./detection:/opt/obsidian/detection
+      - ./scripts:/opt/obsidian/scripts
+    restart: "no"

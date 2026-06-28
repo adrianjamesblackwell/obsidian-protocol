@@ -1,0 +1,59 @@
+#!/usr/bin/env bpftrace
+/*
+ * telemetry/collectors/pwnkit_ebpf_trace.bt
+ *
+ * OBSIDIAN PROTOCOL — eBPF Live Syscall Monitor (VECTOR-II)
+ *
+ * Uses bpftrace to monitor execve() syscalls live at the kernel
+ * level. DIFFERENCE from auditd: auditd depends on the userspace
+ * audit subsystem, and PwnKit's argc=0 call may not be logged
+ * correctly on some kernel/auditd version combinations. eBPF closes
+ * this gap by catching the syscall directly from the kernel — the
+ * same category of approach real EDR products (CrowdStrike,
+ * SentinelOne) use for PwnKit detection.
+ *
+ * Usage (inside the container, as root):
+ *   bpftrace telemetry/collectors/pwnkit_ebpf_trace.bt
+ *
+ * NOTE: bpftrace requires the container to run with --privileged or
+ * at least the CAP_BPF/CAP_SYS_ADMIN capabilities. Add this
+ * capability to the target-49 service in docker-compose.yml if needed
+ * (see the setup note in telemetry/README.md).
+ */
+
+BEGIN
+{
+    printf("[OBSIDIAN/eBPF] PwnKit (VECTOR-II) syscall monitor started.\n");
+    printf("[OBSIDIAN/eBPF] Monitoring execve() calls, looking for the argc=0 + pkexec pattern...\n");
+}
+
+// Fires on every entry into the execve() syscall
+tracepoint:syscalls:sys_enter_execve
+/comm == "pkexec"/
+{
+    $filename = str(args->filename);
+    $argv = args->argv;
+
+    // Check whether argv[0] is NULL (PwnKit's argc=0 condition)
+    $arg0 = (uint64) *$argv;
+
+    printf("{\"ebpf_event\":\"execve_pkexec\",\"pid\":%d,\"uid\":%d,\"filename\":\"%s\",\"argv0_null\":%d,\"timestamp\":%lld}\n",
+           pid, uid, $filename, ($arg0 == 0), nsecs);
+
+    if ($arg0 == 0) {
+        printf("[OBSIDIAN/eBPF] *** WARNING: pkexec called with argc=0 (PID=%d, UID=%d) - VECTOR-II signature ***\n", pid, uid);
+    }
+}
+
+// Monitors gconv-related file open attempts (fake .so / gconv-modules)
+tracepoint:syscalls:sys_enter_openat
+/str(args->filename) != "" && (strcontains(str(args->filename), "gconv") || strcontains(str(args->filename), "GCONV_PATH"))/
+{
+    printf("{\"ebpf_event\":\"openat_gconv_artifact\",\"pid\":%d,\"uid\":%d,\"comm\":\"%s\",\"filename\":\"%s\",\"timestamp\":%lld}\n",
+           pid, uid, comm, str(args->filename), nsecs);
+}
+
+END
+{
+    printf("[OBSIDIAN/eBPF] Monitor stopped.\n");
+}

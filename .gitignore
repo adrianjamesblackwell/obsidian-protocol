@@ -1,0 +1,52 @@
+# Threat intel output (regenerable on every run, keep it out of the repo)
+threat-intel/cve_intel_output.json
+
+# Other modules' real operation output (regenerated on every run -
+# see examples/ for sample output instead)
+telemetry/output/
+telemetry/sample-data/*.log
+telemetry/sample-data/*.jsonl
+purple-team/output/
+purple-team/my_attack_log.json
+risk-engine/output/
+intel-export/output/
+correlation-engine/output/
+coverage-heatmap/output/
+telemetry-gap/output/
+rule-quality/output/
+ioc-decay/output/
+root-cause/output/
+emulation-score/output/
+risk-graph/output/
+attack-replay/output/
+reports/*.html
+reports/*.pdf
+reports/executive_summary.md
+reports/executive_summary.json
+reporting/navigator/obsidian_protocol_layer.json
+docs/detection-coverage-matrix.md
+docs/coverage-heatmap.md
+docs/telemetry-gap-analysis.md
+docs/risk-graph.mermaid
+
+# Blackwell Core reasoning layer output (regenerated on every run)
+blackwell-core/evidence-graph/output/
+blackwell-core/correlation-bca/output/
+blackwell-core/risk-score-brs/output/
+blackwell-core/confidence-engine/output/
+blackwell-core/knowledge-graph/output/
+blackwell-core/temporal-reasoning/output/
+blackwell-core/evidence-ranking/output/
+blackwell-core/attack-path-prediction/output/
+blackwell-core/decision-engine/output/
+blackwell-core/benchmark/output/
+
+# Python
+__pycache__/
+*.pyc
+
+# Docker
+.env
+
+# OS
+.DS_Store

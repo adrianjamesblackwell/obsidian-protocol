@@ -1,0 +1,66 @@
+title: PwnKit (CVE-2021-4034) Local Privilege Escalation via pkexec
+id: 0506a799-698b-43b4-85a1-ac4c84c720e9-adapted
+status: stable
+description: |
+    pkexec'in argc=0 (argümansız) çağrılmasını ve GCONV_PATH ortam
+    değişkeninin manipülasyonunu tespit eder.
+
+    KRİTİK UYARI: Bu exploit, pkexec'in kimlik doğrulama ve audit
+    logging kodu çalışmadan ÖNCE zafiyete erişir. Bu nedenle standart
+    /var/log/auth.log ve syslog kayıtları exploit denemesini
+    YAKALAMAZ. Tespit için auditd'nin execve()/open() syscall
+    seviyesinde izleme yapması zorunludur — sadece auth.log'a
+    bakmak yanlış güvenlik hissi verir.
+
+    Bu kural iki kaynağı birleştirir: SigmaHQ'nun auth-log tabanlı
+    kuralı (zayıf sinyal, çoğu durumda hiçbir şey yakalamaz) ve
+    auditd syscall tabanlı tespiti (gerçek sinyal).
+references:
+    - https://github.com/SigmaHQ/sigma/blob/master/rules/linux/auditd/lnx_auditd_cve_2021_4034.yml
+    - https://blog.qualys.com/vulnerabilities-threat-research/2022/01/25/pwnkit-local-privilege-escalation-vulnerability-discovered-in-polkits-pkexec-cve-2021-4034
+    - https://www.sysdig.com/blog/detecting-mitigating-cve-2021-4034-sysdig
+author: obsidian-protocol-warden (auth-log kısmı orijinal olarak Sreeman, SigmaHQ)
+date: 2026/06/27
+logsource:
+    product: linux
+    service: auditd
+detection:
+    # Birincil sinyal (güvenilir): auditd syscall seviyesi
+    # pkexec, hiç argüman olmadan (argc=0) çalıştırılıyor VE
+    # ortam değişkenlerinde GCONV_PATH var
+    selection_auditd_primary:
+        type: 'EXECVE'
+        a0: '/usr/bin/pkexec'
+        # argv dizisi boş / sadece binary adını içeriyor
+    selection_auditd_env:
+        proc.env|contains: 'GCONV_PATH='
+
+    # İkincil sinyal (zayıf, sadece referans için): auth.log
+    # Bu genelde HİÇBİR ŞEY YAKALAMAZ çünkü exploit auth kodunun
+    # önüne geçiyor — ama nadir varyantlarda XAUTHORITY hata mesajı
+    # sızdırılabiliyor
+    selection_authlog_weak:
+        message|contains:
+            - 'pkexec'
+            - 'The value for environment variable XAUTHORITY contains suspicious content'
+
+    # Dosya sistemi göstergesi: GCONV_PATH adlı dizin/dosya oluşturma
+    # (exploit'in gconv-modules sahte dosyasını yazdığı yer)
+    selection_filesystem:
+        file.path|contains:
+            - 'GCONV_PATH='
+            - 'gconv-modules'
+        file.path|startswith:
+            - '/tmp/'
+            - '/dev/shm/'
+
+    condition: (selection_auditd_primary and selection_auditd_env) or selection_filesystem
+falsepositives:
+    - Yok (argc=0 ile pkexec çalıştırmanın meşru bir kullanım senaryosu yoktur)
+level: critical
+tags:
+    - attack.privilege_escalation
+    - attack.t1548.001
+    - attack.t1068
+    - cve.2021-4034
+

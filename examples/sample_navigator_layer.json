@@ -1,0 +1,86 @@
+{
+  "name": "OBSIDIAN PROTOCOL — Detection Coverage",
+  "versions": {
+    "attack": "17",
+    "navigator": "5.1.0",
+    "layer": "4.5"
+  },
+  "domain": "enterprise-attack",
+  "description": "VECTOR-I (CVE-2021-41773/42013) ve VECTOR-II (CVE-2021-4034) saldırı zincirinin Purple Team doğrulama sonuçlarına dayalı MITRE ATT&CK teknik kapsama haritası. Yeşil = WARDEN modülü tarafından yakalandı, Kırmızı = detection gap (yakalanmadı).",
+  "filters": {
+    "platforms": [
+      "Linux"
+    ]
+  },
+  "sorting": 0,
+  "layout": {
+    "layout": "side",
+    "showName": true,
+    "showID": true,
+    "showAggregateScores": false,
+    "countUnscored": false
+  },
+  "hideDisabled": false,
+  "techniques": [
+    {
+      "techniqueID": "T1595",
+      "score": 0,
+      "color": "#e74c3c",
+      "comment": "OBSIDIAN PROTOCOL operasyonunda kullanıldı: VECTOR-I: Apache sürüm doğrulama (recon). Durum: DETECTION GAP - yakalanmadı",
+      "showSubtechniques": true
+    },
+    {
+      "techniqueID": "T1190",
+      "score": 100,
+      "color": "#2ecc71",
+      "comment": "OBSIDIAN PROTOCOL operasyonunda kullanıldı: VECTOR-I: Path traversal ile secrets.env okuma. Durum: WARDEN tarafından yakalandı",
+      "showSubtechniques": true
+    },
+    {
+      "techniqueID": "T1059",
+      "score": 100,
+      "color": "#2ecc71",
+      "comment": "OBSIDIAN PROTOCOL operasyonunda kullanıldı: VECTOR-I: CGI yönlendirme ile RCE (komut çalıştırma). Durum: WARDEN tarafından yakalandı",
+      "showSubtechniques": true
+    },
+    {
+      "techniqueID": "T1548.001",
+      "score": 100,
+      "color": "#2ecc71",
+      "comment": "OBSIDIAN PROTOCOL operasyonunda kullanıldı: VECTOR-II: PwnKit exploit'i ile root'a çıkış. Durum: WARDEN tarafından yakalandı",
+      "showSubtechniques": true
+    }
+  ],
+  "gradient": {
+    "colors": [
+      "#e74c3c",
+      "#2ecc71"
+    ],
+    "minValue": 0,
+    "maxValue": 100
+  },
+  "legendItems": [
+    {
+      "label": "Yakalandı (WARDEN sinyali var)",
+      "color": "#2ecc71"
+    },
+    {
+      "label": "Detection Gap (sinyal yok)",
+      "color": "#e74c3c"
+    }
+  ],
+  "metadata": [
+    {
+      "name": "Proje",
+      "value": "OBSIDIAN PROTOCOL"
+    },
+    {
+      "name": "Üretim tarihi",
+      "value": "otomatik - generate_navigator_layer.py"
+    }
+  ],
+  "showTacticRowBackground": true,
+  "tacticRowBackground": "#1a1a2e",
+  "selectTechniquesAcrossTactics": true,
+  "selectSubtechniquesWithParent": false
+}

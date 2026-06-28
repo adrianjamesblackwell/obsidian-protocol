@@ -1,0 +1,110 @@
+{
+  "nodes": [
+    {
+      "node_id": "internet",
+      "label": "Internet",
+      "node_type": "asset",
+      "risk_score": null,
+      "risk_band": null,
+      "evidence": "Saldırının başlangıç noktası - dış ağ"
+    },
+    {
+      "node_id": "target49",
+      "label": "TARGET-49 (Apache 2.4.49)",
+      "node_type": "asset",
+      "risk_score": 60.5,
+      "risk_band": "YÜKSEK",
+      "evidence": "docker/target-49/Dockerfile - gerçek imaj"
+    },
+    {
+      "node_id": "shell",
+      "label": "labuser shell (foothold)",
+      "node_type": "compromise_state",
+      "risk_score": null,
+      "risk_band": null,
+      "evidence": "docs/walkthrough.md Aşama 4 - RCE üzerinden elde edilen shell"
+    },
+    {
+      "node_id": "root",
+      "label": "root (TARGET-49)",
+      "node_type": "compromise_state",
+      "risk_score": 48.5,
+      "risk_band": "ORTA",
+      "evidence": "docs/walkthrough.md Aşama 6 - PwnKit ile doğrulanmış"
+    },
+    {
+      "node_id": "creddump",
+      "label": "Credential Dump (varsayımsal)",
+      "node_type": "hypothetical",
+      "risk_score": null,
+      "risk_band": null,
+      "evidence": "GERÇEKTEN EXPLOİT EDİLMEDİ - projeksiyon"
+    },
+    {
+      "node_id": "lateral",
+      "label": "Lateral Movement (varsayımsal)",
+      "node_type": "hypothetical",
+      "risk_score": null,
+      "risk_band": null,
+      "evidence": "GERÇEKTEN EXPLOİT EDİLMEDİ - projeksiyon"
+    },
+    {
+      "node_id": "database",
+      "label": "Database (varsayımsal hedef)",
+      "node_type": "hypothetical",
+      "risk_score": null,
+      "risk_band": null,
+      "evidence": "GERÇEKTEN EXPLOİT EDİLMEDİ - projeksiyon, örnek 'son hedef'"
+    }
+  ],
+  "edges": [
+    {
+      "source": "internet",
+      "target": "target49",
+      "label": "VECTOR-I: Path Traversal + RCE",
+      "mitre_technique": "T1190",
+      "cve": "CVE-2021-41773",
+      "confirmed": true
+    },
+    {
+      "source": "target49",
+      "target": "shell",
+      "label": "CGI yönlendirme ile komut çalıştırma",
+      "mitre_technique": "T1059",
+      "cve": "CVE-2021-42013",
+      "confirmed": true
+    },
+    {
+      "source": "shell",
+      "target": "root",
+      "label": "VECTOR-II: PwnKit local privesc",
+      "mitre_technique": "T1548.001",
+      "cve": "CVE-2021-4034",
+      "confirmed": true
+    },
+    {
+      "source": "root",
+      "target": "creddump",
+      "label": "(varsayımsal) /etc/shadow veya bellek dump",
+      "mitre_technique": "T1003",
+      "cve": null,
+      "confirmed": false
+    },
+    {
+      "source": "creddump",
+      "target": "lateral",
+      "label": "(varsayımsal) çalınan kimlik bilgisiyle SSH",
+      "mitre_technique": "T1021",
+      "cve": null,
+      "confirmed": false
+    },
+    {
+      "source": "lateral",
+      "target": "database",
+      "label": "(varsayımsal) DB sunucusuna erişim",
+      "mitre_technique": "T1213",
+      "cve": null,
+      "confirmed": false
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "type": "bundle",
+  "id": "bundle--85baadd3-7f53-4934-94c7-41cc2c58134f",
+  "objects": [
+    {
+      "type": "vulnerability",
+      "spec_version": "2.1",
+      "id": "vulnerability--3d63816a-3aef-4391-8523-8fb6acbbb5be",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "name": "CVE-2021-41773",
+      "description": "Apache HTTP Server 2.4.49 path traversal vulnerability. Yetersiz patch nedeniyle CVE-2021-42013 ile tamamlandı.",
+      "external_references": [
+        {
+          "source_name": "cve",
+          "external_id": "CVE-2021-41773",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-41773"
+        }
+      ]
+    },
+    {
+      "type": "vulnerability",
+      "spec_version": "2.1",
+      "id": "vulnerability--79ee4adf-4a5a-421f-90be-05945f0d6e79",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "name": "CVE-2021-42013",
+      "description": "Apache HTTP Server 2.4.49/2.4.50 path traversal ve RCE. CVE-2021-41773'ün eksik patch'inin tamamlanmış hali.",
+      "external_references": [
+        {
+          "source_name": "cve",
+          "external_id": "CVE-2021-42013",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-42013"
+        }
+      ]
+    },
+    {
+      "type": "vulnerability",
+      "spec_version": "2.1",
+      "id": "vulnerability--1d53986f-685a-4839-b249-eaa76f81d0d9",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "name": "CVE-2021-4034",
+      "description": "polkit pkexec local privilege escalation (PwnKit). argc=0 mantık hatası, GCONV_PATH environment variable manipülasyonu.",
+      "external_references": [
+        {
+          "source_name": "cve",
+          "external_id": "CVE-2021-4034",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-4034"
+        }
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--57d4f6b6-0271-46d1-8c94-d5e54b5e8979",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "name": "Exploit Public-Facing Application (VECTOR-I)",
+      "description": "Apache path traversal üzerinden ilk erişim.",
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1190",
+          "url": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--16a70825-b73b-483d-b0b8-e5eac62c4b3a",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "name": "Command and Scripting Interpreter (VECTOR-I RCE)",
+      "description": "CGI yönlendirme ile komut çalıştırma.",
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1059",
+          "url": "https://attack.mitre.org/techniques/T1059/"
+        }
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--10f9d7f4-8452-4ad7-ba8b-5a488f25c9e2",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "name": "Abuse Elevation Control Mechanism: Setuid/Setgid (VECTOR-II)",
+      "description": "PwnKit ile pkexec/SUID istismarı yoluyla root'a çıkış.",
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1548.001",
+          "url": "https://attack.mitre.org/techniques/T1548/001/"
+        }
+      ]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--03aea00a-51c4-41f3-a3a9-d02dbe564f62",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "name": "Apache Path Traversal - Encoded Double-Dot Sequence",
+      "description": "Encode edilmiş path traversal deseninin /cgi-bin/ ScriptAlias path'i üzerinden kullanılması. WARDEN/Sigma kuralı: detection/sigma/apache_path_traversal_cve_2021_41773.yml",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern_type": "stix",
+      "pattern_version": "2.1",
+      "pattern": "[network-traffic:extensions.http-request-ext.request_value MATCHES '.*%2e%2e/.*cgi-bin.*']",
+      "valid_from": "2026-06-27T11:49:03.762Z"
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--03f63342-0111-49cc-96d4-4dfe6b6fec55",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "name": "PwnKit pkexec argc=0 Exploitation",
+      "description": "pkexec'in argümansız (argc=0) çağrılması ve GCONV_PATH environment variable manipülasyonu. WARDEN/Sigma kuralı: detection/sigma/pwnkit_cve_2021_4034.yml",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern_type": "stix",
+      "pattern_version": "2.1",
+      "pattern": "[process:name = 'pkexec' AND process:command_line = '' AND process:environment_variables.GCONV_PATH MATCHES '.*']",
+      "valid_from": "2026-06-27T11:49:03.762Z"
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--9b7e1d6f-2312-4851-b76c-066dcd0f5e2e",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "name": "AndroxGh0st Botnet - .env Scanning Pattern",
+      "description": "FBI/CISA AA24-016A danışma belgesinde tanımlanan AndroxGh0st botnet IOC deseni (.env dosya tarama, PHPUnit eval-stdin.php exploitation denemesi).",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern_type": "stix",
+      "pattern_version": "2.1",
+      "pattern": "[url:value MATCHES '.*\\\\.env$' OR url:value MATCHES '.*eval-stdin\\\\.php$']",
+      "valid_from": "2026-06-27T11:49:03.762Z"
+    },
+    {
+      "type": "malware",
+      "spec_version": "2.1",
+      "id": "malware--9828e722-8189-42a8-b3cc-c45b6a4df125",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "name": "AndroxGh0st",
+      "description": "Python tabanlı botnet, ilk olarak Aralık 2022'de Lacework tarafından tespit edildi. Laravel .env dosyalarını tarayarak AWS/Microsoft 365/SendGrid/Twilio kimlik bilgilerini çalmaya çalışır. CVE-2021-41773, CVE-2017-9841 ve CVE-2018-15133'ü kullanır. Kaynak: CISA/FBI AA24-016A.",
+      "is_family": true,
+      "malware_types": [
+        "bot"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--14eb4081-5504-4ab2-aebf-bb2c47f48f90",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--03aea00a-51c4-41f3-a3a9-d02dbe564f62",
+      "target_ref": "vulnerability--3d63816a-3aef-4391-8523-8fb6acbbb5be",
+      "description": "CVE-2021-41773 exploitation göstergesi"
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--23cc6656-b20a-42d4-9427-56f2fbdd9284",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--03aea00a-51c4-41f3-a3a9-d02dbe564f62",
+      "target_ref": "vulnerability--79ee4adf-4a5a-421f-90be-05945f0d6e79",
+      "description": "CVE-2021-42013 exploitation göstergesi"
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--1d5f9a02-4d4f-46f3-9072-06e1686cb5da",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--03f63342-0111-49cc-96d4-4dfe6b6fec55",
+      "target_ref": "vulnerability--1d53986f-685a-4839-b249-eaa76f81d0d9",
+      "description": "CVE-2021-4034 exploitation göstergesi"
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--1b64728f-64ac-4e6f-805b-608735c8c0c2",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "relationship_type": "exploits",
+      "source_ref": "vulnerability--3d63816a-3aef-4391-8523-8fb6acbbb5be",
+      "target_ref": "attack-pattern--57d4f6b6-0271-46d1-8c94-d5e54b5e8979",
+      "description": "VECTOR-I initial access"
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--a2c95453-7b81-4db1-81d8-20f395fbc5e1",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "relationship_type": "exploits",
+      "source_ref": "vulnerability--79ee4adf-4a5a-421f-90be-05945f0d6e79",
+      "target_ref": "attack-pattern--16a70825-b73b-483d-b0b8-e5eac62c4b3a",
+      "description": "VECTOR-I execution/RCE"
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--1a17f23c-71d0-4196-904d-a9a8bb842afe",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "relationship_type": "exploits",
+      "source_ref": "vulnerability--1d53986f-685a-4839-b249-eaa76f81d0d9",
+      "target_ref": "attack-pattern--10f9d7f4-8452-4ad7-ba8b-5a488f25c9e2",
+      "description": "VECTOR-II privilege escalation"
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--f23c41bd-643d-4c6c-ae4b-7a6044bafb32",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "relationship_type": "uses",
+      "source_ref": "malware--9828e722-8189-42a8-b3cc-c45b6a4df125",
+      "target_ref": "vulnerability--3d63816a-3aef-4391-8523-8fb6acbbb5be",
+      "description": "AndroxGh0st CVE-2021-41773'ü kullanıyor (CISA AA24-016A)"
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--997a7459-3ce4-44cb-8d7e-2393f8c05c10",
+      "created": "2026-06-27T11:49:03.762Z",
+      "modified": "2026-06-27T11:49:03.762Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--9b7e1d6f-2312-4851-b76c-066dcd0f5e2e",
+      "target_ref": "malware--9828e722-8189-42a8-b3cc-c45b6a4df125",
+      "description": "AndroxGh0st aktivite göstergesi"
+    }
+  ]
+}
