@@ -32,6 +32,69 @@
 
 ---
 
+## Development Timeline
+
+OBSIDIAN PROTOCOL was developed independently over approximately 6
+months before being published. The repository was committed as a
+single snapshot upon completion, so this section documents the
+actual build sequence that the commit history does not show.
+
+**1. Research & planning (~2-3 weeks).** CVE chain selection from the
+CISA KEV catalog, MITRE ATT&CK mapping, and isolated lab architecture
+design — all done before any code was written. The goal at this stage
+was to lock down a data model that every later module (correlation,
+risk, detection, intel) could share, instead of designing each module
+in isolation and reconciling them afterward.
+
+**2. Attack chain & telemetry (~3-4 weeks).** Docker lab setup
+(`docker/`), the VECTOR-I/II exploit chain, and the hybrid telemetry
+collector (`telemetry/`: auditd + eBPF + Apache logs). This was the
+first working component and the foundation every downstream module
+reads from.
+
+**3. Correlation & risk core (~4-5 weeks).** `correlation-engine/`
+(the alert fatigue solution) and `risk-engine/` (composite risk
+scoring), built directly on top of the telemetry output. **Blackwell
+Core's evidence graph and correlation algorithm (BCA) were designed
+in parallel with this stage, not bolted on afterward** — the BCA
+layer, MITRE ATT&CK mapping, and threat-intel correlation were
+intentionally developed together rather than as isolated, sequential
+modules. Keeping them coupled was necessary for the correlation logic
+to produce sound risk decisions and for the threat intelligence
+output to stay consistent all the way through to the dashboard,
+instead of three components that each had to be reconciled after the
+fact.
+
+**4. Detection & validation (~4-5 weeks).** `purple-team/`
+(attack-to-detection matching) and `detection/` (Sigma/YARA rules,
+MITRE mapping), alongside the rest of Blackwell Core (BRS, Confidence
+Engine, Knowledge Graph, Temporal Reasoning, Evidence Ranking, Attack
+Path Prediction, Decision Engine). **This was the hardest stage of
+the project.** Getting threat-intel output (SIGINT/IOCs) and the
+Sigma/YARA detection layer to produce consistent, correctly-weighted
+relationships — making sure a given IOC's confidence score and a
+given rule's MITRE mapping actually agreed with each other, and that
+the resulting calculations held up, instead of being two
+independently-computed numbers that happened to sit next to each
+other in a report — took more iteration than any other part of the
+system.
+
+**5. Supporting analysis modules (~5-6 weeks).** coverage-heatmap,
+telemetry-gap, rule-quality, ioc-decay, root-cause, emulation-score,
+risk-graph, attack-replay, threat-intel (SIGINT), and intel-export
+(STIX/TAXII) — each consuming the shared data model finalized in
+stages 1-4.
+
+**6. Reporting layer, final stage (~2-3 weeks).** `reporting/`: the
+HTML dashboard, PDF report, and executive summary, all generated from
+the same underlying data object so they can never silently disagree
+with each other.
+
+Projects published after this one are committed incrementally as
+they are built, rather than as a single end-of-project snapshot.
+
+---
+
 ## Dashboard Preview
 
 The platform ships its own self-contained, interactive HTML dashboard
