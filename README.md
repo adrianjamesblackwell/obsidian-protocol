@@ -445,7 +445,7 @@ and known limitations:
 - [`docs/threat-intelligence.md`](docs/threat-intelligence.md) — real campaign data (AndroxGh0st, PwnKit's 13-year timeline)
 - [`docs/analysis.md`](docs/analysis.md) — operator assessment template (CVSS vs. real-world experience)
 - [`docs/research-findings.md`](docs/research-findings.md) — metrics, limitations, future work, lessons learned
-- [`blackwell-core/README.md`](blackwell-core/README.md) — the reasoning layer's full architecture
+- [`blackwell-core/README.md`](blackwell-core/README.md) - the reasoning layer's full architecture
 
 ## Report Generation
 
@@ -464,7 +464,7 @@ with each other.
 
 ## Contributing
 
-Contributions are welcome - see [`CONTRIBUTING.md`](CONTRIBUTING.md)
+Contributions are welcome see [`CONTRIBUTING.md`](CONTRIBUTING.md)
 for ground rules, the development setup, and how this project's
 "no fabricated metrics" standard applies to pull requests. Open
 [issues](../../issues) track the current roadmap.
