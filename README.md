@@ -39,6 +39,15 @@ months before being published. The repository was committed as a
 single snapshot upon completion, so this section documents the
 actual build sequence that the commit history does not show.
 
+| Stage | Focus | Duration | Status |
+| :--- | :--- | :--- | :--- |
+| 1 | Research & planning | ~2-3 weeks | Shared data model locked before any code |
+| 2 | Attack chain & telemetry | ~3-4 weeks | First working component |
+| 3 | Correlation & risk core | ~4-5 weeks | Blackwell Core's BCA designed in parallel |
+| 4 | Detection & validation | ~4-5 weeks | **Hardest stage** — see below |
+| 5 | Supporting analysis modules | ~5-6 weeks | Built on the stage 1-4 data model |
+| 6 | Reporting layer | ~2-3 weeks | Final stage, single shared data object |
+
 **1. Research & planning (~2-3 weeks).** CVE chain selection from the
 CISA KEV catalog, MITRE ATT&CK mapping, and isolated lab architecture
 design — all done before any code was written. The goal at this stage
@@ -65,24 +74,31 @@ output to stay consistent all the way through to the dashboard,
 instead of three components that each had to be reconciled after the
 fact.
 
-**4. Detection & validation (~4-5 weeks).** `purple-team/`
-(attack-to-detection matching) and `detection/` (Sigma/YARA rules,
-MITRE mapping), alongside the rest of Blackwell Core (BRS, Confidence
-Engine, Knowledge Graph, Temporal Reasoning, Evidence Ranking, Attack
-Path Prediction, Decision Engine). **This was the hardest stage of
-the project.** Getting threat-intel output (SIGINT/IOCs) and the
-Sigma/YARA detection layer to produce consistent, correctly-weighted
-relationships — making sure a given IOC's confidence score and a
-given rule's MITRE mapping actually agreed with each other, and that
-the resulting calculations held up, instead of being two
-independently-computed numbers that happened to sit next to each
-other in a report — took more iteration than any other part of the
-system.
+**4. Detection & validation (~4-5 weeks). This was the hardest stage
+of the project.** The core issue was that IOC confidence and
+detection-rule output didn't represent the same security reality. A
+Sigma rule could correctly flag a MITRE technique while the IOC Decay
+module, scoring the same indicator's confidence by age and source
+count, pulled in the opposite direction so an incident's risk score
+and its detection coverage would visibly disagree for the same attack
+chain. Detection was answering "was this technique observed," while
+IOC Decay was answering "how much should we still trust this
+indicator" two signals that were correct on their own but
+meaningless until connected to the same model. The fix was making
+detection output confidence-aware rather than a standalone risk
+signal: Sigma confirms attack behavior and MITRE technique, YARA
+contributes artifact-level evidence, and IOC confidence, detection
+confidence, and MITRE coverage all feed the same decision instead of
+being computed and reconciled separately. What broke wasn't the
+alert it was the alert's meaning inside the scoring system, and the
+fix was moving from "is this IOC present" to "how current is it, what
+technique is it tied to, what evidence backs it, and how much weight
+should that combination carry."
 
 **5. Supporting analysis modules (~5-6 weeks).** coverage-heatmap,
 telemetry-gap, rule-quality, ioc-decay, root-cause, emulation-score,
 risk-graph, attack-replay, threat-intel (SIGINT), and intel-export
-(STIX/TAXII) — each consuming the shared data model finalized in
+(STIX/TAXII) each consuming the shared data model finalized in
 stages 1-4.
 
 **6. Reporting layer, final stage (~2-3 weeks).** `reporting/`: the
@@ -98,7 +114,7 @@ they are built, rather than as a single end-of-project snapshot.
 ## Dashboard Preview
 
 The platform ships its own self-contained, interactive HTML dashboard
-(`reports/obsidian_protocol_report.html`) — no server, no external
+(`reports/obsidian_protocol_report.html`) no server, no external
 dependency, just one file. The **Overview** tab below renders live
 from the actual pipeline run shown throughout this README:
 
@@ -109,7 +125,7 @@ from the actual pipeline run shown throughout this README:
 The dashboard has seven tabs (Overview, Findings, Detection, Risk &
 Intel, Engineering, Root Cause, Artifacts) and includes a fully
 interactive, draggable, zoomable render of the actual Blackwell
-Evidence Graph — every chart is wired to the same underlying JSON, not
+Evidence Graph every chart is wired to the same underlying JSON, not
 a static image. See [`examples/sample_report.html`](examples/sample_report.html)
 to open the full dashboard yourself without running anything.
 
@@ -125,11 +141,11 @@ operation report (`reports/obsidian_protocol_report.pdf`):
 ## What problem does this project solve?
 
 OBSIDIAN PROTOCOL is not a lab limited to exploiting a single CVE
-chain — it's a platform that uses the data that chain produces to
+chain it's a platform that uses the data that chain produces to
 simulate the operational problems SOC teams actually live with every
 day. The platform's output is deliberately not a log line, a Sigma
 match, or an IOC. It is an **evidence-grounded security
-recommendation** — a conclusion with its supporting reasoning attached
+recommendation** a conclusion with its supporting reasoning attached
 and traceable, produced by the **Blackwell Core** reasoning layer
 described below, sitting on top of 17 modules that each correspond to
 a named, documented industry problem:
@@ -145,7 +161,7 @@ a named, documented industry problem:
 | Attack progression shown only as a table | **RISK GRAPH** | What's the real path to the database? |
 | IOC found, root cause unknown | **ROOT CAUSE** | Why did this happen, and how to prevent it? |
 | Post-incident timeline is unclear | **ATTACK REPLAY** | How did the attack unfold, minute by minute? |
-| Executives don't read Sigma rules | **EXECUTIVE REPORT / DECISION ENGINE** | Risk, impact, action - on one page |
+| Executives don't read Sigma rules | **EXECUTIVE REPORT / DECISION ENGINE** | Risk, impact, action on one page |
 | Conclusions aren't traceable to evidence | **BLACKWELL EVIDENCE GRAPH** | Why does the system believe this? |
 | Confidence is a single brittle bucket | **BLACKWELL CONFIDENCE ENGINE** | How much corroboration backs this? |
 | Severity and urgency get conflated | **BLACKWELL EVIDENCE RANKING** | What should an analyst check first? |
@@ -155,7 +171,7 @@ a named, documented industry problem:
 ## Blackwell Core: the reasoning layer
 
 [`blackwell-core/`](blackwell-core/) is a research-grade reasoning
-layer that sits **on top of** the 17-module pipeline below — it does
+layer that sits **on top of** the 17 module pipeline below it does
 not replace or fork any of it. Every legacy module keeps working
 completely standalone. Blackwell Core's job is to turn the existing
 modules' outputs into a single, queryable, auditable evidence
